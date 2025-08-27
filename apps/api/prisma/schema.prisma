@@ -1,0 +1,64 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Channel {
+  AIRBNB
+  BOOKING_COM
+  EXPEDIA
+  DIRECT
+  OTHER
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id         String   @id @default(cuid())
+  propertyId String
+  label      String
+  property   Property @relation(fields: [propertyId], references: [id])
+  bookings   Booking[]
+}
+
+model Guest {
+    id        String   @id @default(cuid())
+    name      String
+    phone     String?
+    email     String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt 
+
+    bookings  Booking[]
+
+}
+
+model Booking {
+    id            String   @id @default(cuid())
+    roomId        String
+    guestId       String
+    checkIn       DateTime
+    checkOut      DateTime
+    channel       Channel  @default(DIRECT)
+
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+  room  Room  @relation(fields: [roomId], references: [id])
+  guest Guest @relation(fields: [guestId], references: [id])
+
+    @@index([roomId])
+    @@index([guestId])
+}
