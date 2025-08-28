@@ -1,7 +1,7 @@
 // apps/api/src/routes/bookings.js
 import { PrismaClient, Channel } from "@prisma/client";
 import { z } from "zod";
-import { postBookingAccruals } from "../services/posting.js";
+import { postBookingAccruals } from "../../services/posting.js";
 
 const prisma = new PrismaClient();
 
