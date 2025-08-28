@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "create-jest": "^30.1.1"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}

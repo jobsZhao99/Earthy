@@ -8,11 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 金额口径：收入正数，费用负数。periodMonth 统一存当月 UTC 月初。
+enum AccountCode {
+  RENT    // 当期应计租金收入
+  PARKING
+  BEDDING
+  CLEANING
+  OTHERS
+}
+
+
 enum Channel {
   AIRBNB
   BOOKING_COM
   EXPEDIA
   DIRECT
+  LEASING_CONTRACT
   OTHER
 }
 
@@ -21,17 +32,25 @@ model Property {
   name      String
   address   String?
   rooms     Room[]
+  timezone  String   @default("America/Los_Angeles") // IANA TZ
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Room {
-  id         String   @id @default(cuid())
-  propertyId String
-  label      String
-  property   Property @relation(fields: [propertyId], references: [id])
-  bookings   Booking[]
+  id          String   @id @default(cuid())
+  propertyId  String
+  label       String
+
+  nightlyRate Decimal @db.Decimal(10, 2) // 先可空
+
+  property    Property @relation(fields: [propertyId], references: [id])
+  bookings    Booking[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
+
 
 model Guest {
     id        String   @id @default(cuid())
@@ -51,8 +70,13 @@ model Booking {
     guestId       String
     checkIn       DateTime
     checkOut      DateTime
-    channel       Channel  @default(DIRECT)
 
+    guestTotal Decimal?          // 租客支付总额（Gross, 含平台费/税费）
+    payout     Decimal?          // 平台打给房东的净额 (Host Payout)
+
+
+    channel       Channel  @default(AIRBNB)
+    tzSnapshot    String?   // 生成时记录使用的时区（可选但很有用）
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 
@@ -61,4 +85,33 @@ model Booking {
 
     @@index([roomId])
     @@index([guestId])
+}
+
+
+
+model JournalEntry {
+  id          String    @id @default(cuid())
+  periodMonth DateTime  // 该月1号(UTC)
+  memo        String?
+  createdAt   DateTime  @default(now())
+  lines       JournalLine[]
+
+  @@unique([periodMonth]) // 每月一条总分录（够用了；多账簿可改为 periodMonth+ledger）
+}
+
+model JournalLine {
+  id           String    @id @default(cuid())
+  journalId    String
+  bookingId    String?
+  propertyId   String
+  roomId       String
+  account      AccountCode
+  amountCents  Decimal  @db.Decimal(10, 2) // 收入正数，费用负数
+  periodMonth  DateTime
+  createdAt    DateTime  @default(now())
+
+  journal  JournalEntry @relation(fields: [journalId], references: [id])
+
+  // 幂等过账关键：同一 booking、同一科目、同一会计月只有一条
+  @@unique([bookingId, account, periodMonth])
 }
