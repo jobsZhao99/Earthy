@@ -70,7 +70,6 @@ model Booking {
     guestId       String
     checkIn       DateTime
     checkOut      DateTime
-
     guestTotal Decimal?          // 租客支付总额（Gross, 含平台费/税费）
     payout     Decimal?          // 平台打给房东的净额 (Host Payout)
 
