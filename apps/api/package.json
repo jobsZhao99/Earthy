@@ -18,7 +18,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jest": "^30.1.1",
-    "luxon": "^3.7.1"
+    "luxon": "^3.7.1",
+    "zod": "^4.1.4"
   },
   "devDependencies": {
     "create-jest": "^30.1.1",
