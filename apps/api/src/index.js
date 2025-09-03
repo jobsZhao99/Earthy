@@ -1,7 +1,7 @@
 // apps/api/src/index.js
 import express from "express";
 import cors from "cors";
-import { createBookingHandler } from "./routes/bookings.js";
+import { createBookingHandler } from "./routes/bookingsbackup.js";
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_ORIGIN || "*", credentials: true }));

@@ -1,0 +1,33 @@
+### Create a new ledger
+POST http://localhost:3000/api/ledgers
+Content-Type: application/json
+
+{
+  "name": "September Ledger"
+}
+
+
+### Create a new guest
+POST http://localhost:3000/api/guests
+Content-Type: application/json
+
+{
+  "name": "Jobs Zhao",
+  "phone": "2133086336",
+  "email": "jobszhao99@gmail.com"
+}
+
+### Create a new Booking
+curl -X POST http://localhost:3000/api/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "roomId": "cmf4bca8700028nq3oh5de7t9",
+    "guestId": "cmf4cln3i00028nuelxy58na8",
+    "checkIn": "2025-09-01T15:00:00-07:00",
+    "checkOut": "2026-08-31T11:00:00-07:00",
+    "channel": "AIRBNB",
+    "guestTotalCents": 3000,
+    "payoutCents": 36500,
+    "confirmationCode": "ABC12345",
+    "status": "NEW"
+  }'

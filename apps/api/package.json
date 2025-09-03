@@ -2,29 +2,35 @@
   "name": "earthy-api",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
-    "build": "echo \"no build\"",
+    "dev:local": "dotenv -e .env.local -- nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "dev:render": "dotenv -e .env.render -- nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc -p tsconfig.json",
     "prisma:gen": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy",
-    "postinstall": "prisma generate",
-    "test": "vitest run"
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:deploy": "prisma migrate deploy",
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "-": "^0.0.1",
-    "@prisma/client": "^6.7.0",
+    "@prisma/client": "^6.15.0",
     "cors": "^2.8.5",
     "D": "^1.0.0",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "jest": "^30.1.1",
     "luxon": "^3.7.1",
     "zod": "^4.1.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
     "create-jest": "^30.1.1",
-    "nodemon": "^3.1.0",
-    "prisma": "^6.7.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.15.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
 }

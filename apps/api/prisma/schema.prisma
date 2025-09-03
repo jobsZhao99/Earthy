@@ -1,3 +1,4 @@
+
 generator client {
   provider   = "prisma-client-js"
   engineType = "binary"
@@ -7,6 +8,16 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum BookingRecordStatus {
+  NEW
+  TRANSFER
+  CANCELL
+}
+
+
+
+
 
 // 金额口径：收入正数，费用负数。periodMonth 统一存当月 UTC 月初。
 enum AccountCode {
@@ -27,28 +38,48 @@ enum Channel {
   OTHER
 }
 
+model Ledger {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  properties Property[] 
+  journalEntries JournalEntry[]
+  // 可选：currency, timezone, companyId 等
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+
 model Property {
   id        String   @id @default(cuid())
   name      String
   address   String?
+  ledgerId   String // 多账簿支持
+  ledger  Ledger @relation(fields: [ledgerId], references: [id])
+  
   rooms     Room[]
   timezone  String   @default("America/Los_Angeles") // IANA TZ
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@unique([ledgerId, name])
+  @@index([ledgerId])
 }
 
 model Room {
   id          String   @id @default(cuid())
   propertyId  String
-  label       String
-
-  nightlyRate Decimal @db.Decimal(10, 2) // 先可空
-
   property    Property @relation(fields: [propertyId], references: [id])
-  bookings    Booking[]
+
+  label       String
+  nightlyRateCents Int? 
+
+  bookings    BookingRecord[]
+
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  @@unique([propertyId, label])
 }
 
 
@@ -60,21 +91,25 @@ model Guest {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt 
 
-    bookings  Booking[]
+    bookings  BookingRecord[]
 
 }
 
-model Booking {
+// 租客预订记录, 包含新预订、退房、取消等状态
+model BookingRecord {
     id            String   @id @default(cuid())
     roomId        String
+    status        BookingRecordStatus @default(NEW)
     guestId       String
     checkIn       DateTime
     checkOut      DateTime
-    guestTotal Decimal?          // 租客支付总额（Gross, 含平台费/税费）
-    payout     Decimal?          // 平台打给房东的净额 (Host Payout)
-
+    guestTotalCents Int?          // 租客支付总额（Gross, 含平台费/税费）
+    payoutCents     Int?          // 平台打给房东的净额 (Host Payout)
+    journalLines    JournalLine[]
 
     channel       Channel  @default(AIRBNB)
+    confirmationCode String?  // 平台订单号
+    contractUrl   String?  // 租赁合同链接（可选）
     tzSnapshot    String?   // 生成时记录使用的时区（可选但很有用）
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
@@ -82,8 +117,7 @@ model Booking {
   room  Room  @relation(fields: [roomId], references: [id])
   guest Guest @relation(fields: [guestId], references: [id])
 
-    @@index([roomId])
-    @@index([guestId])
+    @@index([roomId,guestId])
 }
 
 
@@ -91,26 +125,34 @@ model Booking {
 model JournalEntry {
   id          String    @id @default(cuid())
   periodMonth DateTime  // 该月1号(UTC)
+  ledgerId    String
+  ledger      Ledger    @relation(fields: [ledgerId], references: [id])
   memo        String?
   createdAt   DateTime  @default(now())
-  lines       JournalLine[]
+  updatedAt   DateTime  @updatedAt
+  journalLines       JournalLine[]
 
-  @@unique([periodMonth]) // 每月一条总分录（够用了；多账簿可改为 periodMonth+ledger）
+
+  @@unique([periodMonth, ledgerId]) // 每月一条总分录（够用了；多账簿可改为 periodMonth+ledger）
+  @@index([periodMonth])
 }
 
 model JournalLine {
   id           String    @id @default(cuid())
-  journalId    String
-  bookingId    String?
-  propertyId   String
-  roomId       String
-  account      AccountCode
-  amountCents  Decimal  @db.Decimal(10, 2) // 收入正数，费用负数
-  periodMonth  DateTime
-  createdAt    DateTime  @default(now())
-
+  journalId    String 
   journal  JournalEntry @relation(fields: [journalId], references: [id])
 
+
+  bookingId    String
+  booking      BookingRecord   @relation(fields: [bookingId], references: [id])
+
+
+  account      AccountCode
+  amountCents  Int  // 收入正数，费用负数
+  createdAt    DateTime  @default(now())
+
+
   // 幂等过账关键：同一 booking、同一科目、同一会计月只有一条
-  @@unique([bookingId, account, periodMonth])
+  @@unique([bookingId, account,journalId])
+  @@index([account,journalId])
 }

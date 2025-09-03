@@ -1,0 +1,2 @@
+~/earthy/apps/api$ npx tsx src/scripts/importProperties.ts data/propertiesimport.tsv 
+✅ 完成。ledger=USC-TPM, 导入 59 行，实际写入（去重后）59 条 property。
