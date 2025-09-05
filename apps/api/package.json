@@ -4,8 +4,8 @@
   "scripts": {
     "dev:local": "dotenv -e env -e .env.local -- nodemon --watch src --ext ts --exec tsx src/server.ts",
     "dev:render": "dotenv -e env  -e .env.render -- nodemon --watch src --ext ts --exec tsx src/server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc -p tsconfig.json",
+    "start": "dotenv -e .env.render -- node dist/server.js",
+    "build": "rimraf dist && tsc -p tsconfig.json",
     "prisma:gen": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:deploy": "prisma migrate deploy",
