@@ -1,22 +1,19 @@
 // src/routes/reports.ts
 import { Router } from "express";
 import { prisma } from "../prisma.js";
-import { monthStartUTC, nextMonthUTC } from "../utils/dates.js";
+import { monthStartUTC } from "../utils/dates.js";
 import { AccountCode } from "@prisma/client";
-
 const r = Router();
-
 /** GET /api/reports/monthly?from=YYYY-MM&to=YYYY-MM&propertyId=... */
 r.get("/monthly", async (req, res) => {
-  const { from, to, propertyId } = req.query as any;
-  if (!from || !to) return res.status(400).json({ error: "from/to required (YYYY-MM)" });
-
-  const [fy, fm] = String(from).split("-").map(Number);
-  const [ty, tm] = String(to).split("-").map(Number);
-  const fromUTC = monthStartUTC(fy, fm);
-  const toUTC   = monthStartUTC(ty, tm);
-
-  const rows = await prisma.$queryRawUnsafe<any[]>(`
+    const { from, to, propertyId } = req.query;
+    if (!from || !to)
+        return res.status(400).json({ error: "from/to required (YYYY-MM)" });
+    const [fy, fm] = String(from).split("-").map(Number);
+    const [ty, tm] = String(to).split("-").map(Number);
+    const fromUTC = monthStartUTC(fy, fm);
+    const toUTC = monthStartUTC(ty, tm);
+    const rows = await prisma.$queryRawUnsafe(`
     SELECT
       date_trunc('month', j."periodMonth")::date AS month,
       p."name" AS property,
@@ -38,8 +35,6 @@ r.get("/monthly", async (req, res) => {
     GROUP BY 1,2,3
     ORDER BY 1,2,3
   `, fromUTC, toUTC);
-
-  res.json({ rows });
+    res.json({ rows });
 });
-
 export default r;

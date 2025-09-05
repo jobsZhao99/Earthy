@@ -1,7 +1,7 @@
 // src/routes/posting.ts
 import { Router } from "express";
-import { prisma } from "../prisma";
-import { monthStartUTC, nextMonthUTC } from "../utils/dates";
+import { prisma } from "../prisma.js";
+import { monthStartUTC, nextMonthUTC } from "../utils/dates.js";
 import { AccountCode } from "@prisma/client";
 
 const r = Router();
@@ -87,7 +87,7 @@ r.post("/posting/run", async (req, res) => {
   for (const b of bookings) {
     const resp = await fetch(`${req.protocol}://${req.get("host")}/api/tasks/posting/booking/${b.id}`, { method: "POST" });
     if (resp.ok) {
-      const { posted } = await resp.json();
+      const { posted } = (await resp.json()) as { posted: number };
       lines += posted;
     }
   }
