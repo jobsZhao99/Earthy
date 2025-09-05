@@ -2,8 +2,8 @@
   "name": "earthy-api",
   "type": "module",
   "scripts": {
-    "dev:local": "dotenv -e .env.local -- nodemon --watch src --ext ts --exec tsx src/server.ts",
-    "dev:render": "dotenv -e .env.render -- nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "dev:local": "dotenv -e env -e .env.local -- nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "dev:render": "dotenv -e env  -e .env.render -- nodemon --watch src --ext ts --exec tsx src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc -p tsconfig.json",
     "prisma:gen": "prisma generate",
@@ -15,22 +15,26 @@
     "-": "^0.0.1",
     "@prisma/client": "^6.15.0",
     "cors": "^2.8.5",
+    "csv-stringify": "^6.6.0",
     "D": "^1.0.0",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "jest": "^30.1.1",
-    "luxon": "^3.7.1",
     "zod": "^4.1.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.0",
+    "cli-progress": "^3.12.0",
     "create-jest": "^30.1.1",
+    "dotenv-cli": "^10.0.0",
+    "luxon": "^3.7.1",
     "nodemon": "^3.1.10",
     "prisma": "^6.15.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "xlsx": "^0.18.5"
   }
 }

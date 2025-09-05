@@ -30,6 +30,36 @@ function splitNightsByMonthTZ(checkIn: Date, checkOut: Date, tz: string) {
   return chunks;
 }
 
+
+/** 
+ * 按“物业时区”的自然月切分入住-退房区间，返回每段的天数（含入住和退房当日） 
+ */
+function splitDaysByMonthTZ(checkIn: Date, checkOut: Date, tz: string) {
+  // 注意：这里退房日也算一天
+  const ci = DateTime.fromJSDate(checkIn).setZone(tz).startOf("day");
+  const co = DateTime.fromJSDate(checkOut).setZone(tz).startOf("day").plus({ days: 1 }); 
+  // ↑ 把退房日包含进去 → 等价于 nights+1
+
+  if (co <= ci) return [];
+
+  const chunks: { periodMonthUTC: Date; days: number }[] = [];
+  let cursor = ci;
+  while (cursor < co) {
+    const monthStartLocal = cursor.startOf("month");
+    const nextMonthLocal = monthStartLocal.plus({ months: 1 });
+    const stop = co < nextMonthLocal ? co : nextMonthLocal;
+    const days = Math.max(0, Math.round(stop.diff(cursor, "days").days));
+    if (days > 0) {
+      // 账期：该地月初 → UTC 月初
+      const periodMonthUTC = monthStartLocal.toUTC().startOf("month").toJSDate();
+      chunks.push({ periodMonthUTC, days });
+    }
+    cursor = nextMonthLocal;
+  }
+  return chunks;
+}
+
+
 /** 将单个 BookingRecord 的 RENT 按晚分摊到各自然月（幂等） */
 export async function postBookingAccruals(bookingId: string) {
   const booking = await prisma.bookingRecord.findUnique({
@@ -42,29 +72,29 @@ export async function postBookingAccruals(bookingId: string) {
   const ledgerId = booking.room.property.ledgerId;
 
   // 切月 + 计算总晚数
-  const chunks = splitNightsByMonthTZ(booking.checkIn, booking.checkOut, tz);
+  const chunks = splitDaysByMonthTZ(booking.checkIn, booking.checkOut, tz);
   // 打印详细内容
   // console.log("切分结果 chunks:", chunks.map(c => ({
   //   monthUTC: c.periodMonthUTC.toISOString(),
   //   nights: c.nights
   // })));
-  const totalNights = chunks.reduce((s, c) => s + c.nights, 0);
-  if (totalNights === 0) return { posted: 0 };
+  const totalDays = chunks.reduce((s, c) => s + c.days, 0);
+  if (totalDays === 0) return { posted: 0 };
 
   // 金额口径：用 payoutCents；无则为 0（你也可改为 nightlyRateCents * 晚数）
   const totalCents = booking.payoutCents ?? 0;
-  const totalDays = totalNights + 1;
+
   // 分摊金额（按晚均分）
   let createdLines = 0;
   let allocatedCents = 0;
   let allocatedDays = 0;
   for (let i = 0; i < chunks.length; i++) {
-    const { periodMonthUTC, nights } = chunks[i];
+    const { periodMonthUTC, days } = chunks[i];
 
     // 当月作为“天”的基数
     const baseDays =
       i < chunks.length - 1
-        ? nights // 前N-1个月，直接用 nights
+        ? days // 前N-1个月，直接用 nights
         : Math.max(0, totalDays - allocatedDays); // 最后一个月包含额外那1天
 
     // 分配金额：前N-1个月按比例四舍五入，最后一个月用剩余收口
@@ -117,5 +147,5 @@ export async function postBookingAccruals(bookingId: string) {
   }
 
 
-  return { posted: createdLines, months: chunks.length, totalNights, totalCents };
+  return { posted: createdLines, months: chunks.length, totalDays, totalCents };
 }

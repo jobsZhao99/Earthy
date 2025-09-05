@@ -113,6 +113,7 @@ model BookingRecord {
     tzSnapshot    String?   // 生成时记录使用的时区（可选但很有用）
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
+    memo            String?   @db.Text
 
   room  Room  @relation(fields: [roomId], references: [id])
   guest Guest @relation(fields: [guestId], references: [id])

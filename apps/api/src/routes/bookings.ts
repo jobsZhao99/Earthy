@@ -85,6 +85,7 @@ r.post("/bulk", async (req, res) => {
     confirmationCode: x.confirmationCode,
     contractUrl: x.contractUrl,
     status: x.status,
+    memo: x.memo,
   }));
   const created = await prisma.bookingRecord.createMany({ data, skipDuplicates: true });
   res.status(201).json(created);

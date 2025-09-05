@@ -1,2 +1,30 @@
 ~/earthy/apps/api$ npx tsx src/scripts/importProperties.ts data/propertiesimport.tsv 
 ✅ 完成。ledger=USC-TPM, 导入 59 行，实际写入（去重后）59 条 property。
+
+
+
+cd apps/api
+npx prisma generate
+npx tsx scripts/importGuests.ts data/guests.tsv
+
+
+
+// open prisma studio
+npx prisma studio
+
+## 导入房间数据
+npx tsx scripts/importRooms.ts data/rooms.tsv
+
+
+
+## 启动本地开发环境
+npm run dev:local
+## 启动渲染服务
+npm run dev:render
+
+
+## 迁移脚本
+npx prisma generate
+npx prisma migrate dev -n "add_memo_to_booking_record"
+# 生产环境用：
+# npx prisma migrate deploy
