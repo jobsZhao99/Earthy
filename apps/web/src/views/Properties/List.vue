@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { api } from '../../api/client';
+import { api } from '../../api';
 import type { Property } from '../../types';
 
 const data = ref<{ rows: Property[] }>({ rows: [] });

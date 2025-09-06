@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { api } from '../../api/client';
+import { api } from '../../api';
 import type { Paged, BookingRecord, Property } from '../../types';
 import { DateTime } from 'luxon';
 import { useRouter } from 'vue-router';
@@ -20,8 +20,9 @@ const properties = ref<Property[]>([]);
 const data = ref<Paged<BookingRecord>>({ page:1, pageSize:20, total:0, rows:[] });
 
 async function loadProperties() {
-  const res = await api.get('/properties', { params: { pageSize: 500 } });
-  properties.value = res.data.rows ?? res.data ?? [];
+  const res = await api.get('/properties');
+  // console.log(res);
+  properties.value = res.rows ?? res ?? [];
 }
 
 async function load() {
@@ -32,8 +33,8 @@ async function load() {
     if (q.value.from) params.from = q.value.from;
     if (q.value.to) params.to = q.value.to;
 
-    const res = await api.get<Paged<BookingRecord>>('/bookings', { params });
-    data.value = res.data;
+    const res = await api.get('/bookings?' + new URLSearchParams(params).toString());
+    data.value = res;
   } finally {
     loading.value = false;
   }
@@ -64,13 +65,13 @@ watch(q, () => load(), { deep: true });
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
-    <el-table-column label="Property" width="240" :formatter="(_, __, row) => row.room?.property?.name || ''" />
+    <el-table-column label="Property" width="240" :formatter="(_, __, row) => row?.room?.property?.name || ''" />
     <el-table-column label="Room" prop="room.label" width="120" />
-    <el-table-column label="Guest" :formatter="(_, __, row) => row.guest?.name || ''" width="160" />
-    <el-table-column label="Check In" :formatter="(_, __, row) => fmt(row.checkIn)" width="180" />
-    <el-table-column label="Check Out" :formatter="(_, __, row) => fmt(row.checkOut)" width="180" />
+    <el-table-column label="Guest" :formatter="(_, __, row) => row?.guest?.name || ''" width="160" />
+    <el-table-column label="Check In" :formatter="(_, __, row) => fmt(row?.checkIn)" width="180" />
+    <el-table-column label="Check Out" :formatter="(_, __, row) => fmt(row?.checkOut)" width="180" />
     <el-table-column label="Channel" prop="channel" width="130" />
-    <el-table-column label="Payout" :formatter="(_, __, row) => (row.payoutCents ?? 0) / 100" width="110" />
+    <el-table-column label="Payout" :formatter="(_, __, row) => (row?.payoutCents ?? 0) / 100" width="110" />
   </el-table>
 
   <div class="mt-3 flex justify-end">
