@@ -39,17 +39,17 @@ console.log('[CORS] allowedOrigins =', allowedOrigins);
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // 无 Origin（如 curl/Render 健康检查）直接放行
-    if (!origin) return callback(null, true);
-    const clean = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(clean)) return callback(null, true);
+    if (!origin) return callback(null, true); // 没有 Origin（curl/健康检查）继续放行
+    const clean = origin.replace(/^"|"$/g, '').replace(/\/$/, ''); // 去首尾引号 + 去尾斜杠
+    if (allowedOrigins.includes(clean)) return callback(null, clean); // ← 返回“干净”的字符串
     return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: 'Content-Type,Authorization',
+  // 可选：确保预检继续走到你后面的 OPTIONS 兜底（不是必须）
+  // preflightContinue: true,
 };
-
 const app = express();
 
 // Render/反代下建议信任代理（获取正确的 req.ip/协议）
@@ -68,10 +68,33 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS（预检与业务一致）
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// app.options('*', cors(corsOptions));
+
+// 放在 app.use(cors(corsOptions)) 之后
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers.origin || '';
+    const clean = String(origin).replace(/^"|"$/g, '').replace(/\/$/, '');
+    if (allowedOrigins.includes(clean)) {
+      res.setHeader('Access-Control-Allow-Origin', clean);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        req.headers['access-control-request-headers'] || 'Content-Type,Authorization'
+      );
+    }
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 
 // 健康检查
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
+
+
 
 // API 路由统一挂在 /api 前缀下
 app.use('/api/bookings', bookings);
