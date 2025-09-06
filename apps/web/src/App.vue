@@ -27,12 +27,17 @@ async function createDemo() {
 </script>
 
 <template>
-  <h1>Earthy Demo</h1>
-  <pre>Health: {{ health }}</pre>
-  <button @click="createDemo">Create Booking (demo)</button>
-  <ul>
-    <li v-for="b in bookings" :key="b.id">
-      {{ b.id }} — {{ b.channel }} — {{ b.checkIn }} → {{ b.checkOut }}
-    </li>
-  </ul>
+  <el-container style="min-height: 100vh">
+    <el-header>
+      <el-menu mode="horizontal" router>
+        <el-menu-item index="/">Bookings</el-menu-item>
+        <el-menu-item index="/properties">Properties</el-menu-item>
+        <el-menu-item index="/reports">Reports</el-menu-item>
+      </el-menu>
+    </el-header>
+    <el-main>
+      <router-view />
+    </el-main>
+  </el-container>
 </template>
+
