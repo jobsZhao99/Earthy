@@ -35,9 +35,11 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 
+app.use(express.json());
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -55,7 +57,6 @@ app.use(cors({
 app.options("*", cors());
 
 
-app.use(express.json());
 
 app.get("/healthz", async (_req, res) => {
   try { await prisma.$queryRaw`SELECT 1`; res.json({ ok: true }); }
