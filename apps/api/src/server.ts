@@ -92,7 +92,7 @@ app.use((req, res, next) => {
 
 
 // 健康检查
-app.get('/healthz', (_req, res) => res.json({ ok: true }));
+app.get('/api/healthz', (_req, res) => res.json({ ok: true }));
 
 
 

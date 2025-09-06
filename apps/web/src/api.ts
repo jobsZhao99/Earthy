@@ -1,11 +1,19 @@
-export const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "/api";
 
 export async function api(path: string, init?: RequestInit) {
   const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      "Content-Type": "application/json",
+    },
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...init
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
   return res.json();
 }
