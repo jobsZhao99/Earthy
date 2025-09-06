@@ -211,7 +211,11 @@ async function main() {
   const limit = pLimit(8); // 并发度 8，可视数据库性能调整
   const newBookingIds: string[] = [];
   const notFound: string[] = [];
-
+  function parseLADate(dateStr: string): Date {
+    const dt = DateTime.fromISO(dateStr.trim(), { zone: LA_TZ }).startOf("day");
+    if (!dt.isValid) throw new Error(`Invalid confirmedDate: ${dateStr}`);
+    return dt.toJSDate();
+  }
   await Promise.allSettled(
     rows.map(r => limit(async () => {
       try {
@@ -236,7 +240,7 @@ async function main() {
         const channel = detectChannel(r.confirmationCode);
         const memoParts = [];
         if (r.note) memoParts.push(r.note);
-        if (r.confirmedDate) memoParts.push(`Confirmed: ${r.confirmedDate}`);
+        // if (r.confirmedDate) memoParts.push(`Confirmed: ${r.confirmedDate}`);
         const memo = memoParts.join(' | ') || null;
 
         const created = await prisma.bookingRecord.create({
@@ -244,7 +248,8 @@ async function main() {
             roomId, guestId, checkIn, checkOut, channel,
             guestTotalCents, payoutCents,
             confirmationCode: r.confirmationCode || null,
-            contractUrl: null, status: BookingRecordStatus.NEW, memo
+            contractUrl: null, status: BookingRecordStatus.NEW, memo,
+            createdAt: r.confirmedDate ? parseLADate(r.confirmedDate) : undefined
           },
           select: { id: true }
         });

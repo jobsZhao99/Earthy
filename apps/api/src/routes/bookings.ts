@@ -39,13 +39,13 @@ r.get("/", async (req, res) => {
     prisma.bookingRecord.count({ where }),
   ]);
 
-  
+
   const bookings = rows.map((b) => {
     const timezone = b.room?.property?.timezone ?? "America/Los_Angeles";
     return {
       ...b,
-      checkIn: DateTime.fromJSDate(b.checkIn).setZone(timezone).toJSDate(),
-      checkOut: DateTime.fromJSDate(b.checkOut).setZone(timezone).toJSDate(),
+      checkIn: DateTime.fromJSDate(b.checkIn).setZone(timezone).toFormat("yyyy-LL-dd"),
+      checkOut: DateTime.fromJSDate(b.checkOut).setZone(timezone).toFormat("yyyy-LL-dd"),
     };
   });
   
