@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../prisma.js";
 import { getPagination } from "../utils/pagination.js";
 import { postBookingAccruals } from "../services/posting.js";
+import { DateTime } from "luxon";
 
 const r = Router();
 
@@ -38,7 +39,19 @@ r.get("/", async (req, res) => {
     prisma.bookingRecord.count({ where }),
   ]);
 
-  res.json({ page, pageSize, total, rows });
+  
+  const bookings = rows.map((b) => {
+    const timezone = b.room?.property?.timezone ?? "America/Los_Angeles";
+    return {
+      ...b,
+      checkIn: DateTime.fromJSDate(b.checkIn).setZone(timezone).toJSDate(),
+      checkOut: DateTime.fromJSDate(b.checkOut).setZone(timezone).toJSDate(),
+    };
+  });
+  
+  res.json({ page, pageSize, total, rows: bookings });
+  
+  // res.json({ page, pageSize, total, rows });
 });
 
 /** 详情 */

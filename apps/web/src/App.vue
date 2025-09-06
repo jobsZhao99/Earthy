@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import { api } from "./api";
 
 const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "/api";
-console.log("API_BASE", API_BASE);
+// console.log("API_BASE", API_BASE);
 const health = ref<any>(null);
 const bookings = ref<any[]>([]);
 
@@ -17,8 +17,8 @@ onMounted(async () => {
   <el-container style="min-height: 100vh">
     <el-header>
       <el-menu mode="horizontal" router>
-        <!-- <el-menu-item index="/">Bookings</el-menu-item> -->
-        <!-- <el-menu-item index="/properties">Properties</el-menu-item> -->
+        <el-menu-item index="/">Bookings</el-menu-item>
+        <el-menu-item index="/properties">Properties</el-menu-item>
         <!-- <el-menu-item index="/reports">Reports</el-menu-item> -->
       </el-menu>
     </el-header>

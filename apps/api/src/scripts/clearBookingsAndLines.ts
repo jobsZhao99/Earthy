@@ -14,6 +14,10 @@ async function main() {
   const br = await prisma.bookingRecord.deleteMany({});
   console.log(`🗑️ 删除 BookingRecord: ${br.count} 行`);
 
+  // guest
+  // const guest = await prisma.guest.deleteMany({});
+  // console.log(`🗑️ 删除 guest: ${guest.count} 行`);
+
   console.log('✅ 清理完成');
 }
 

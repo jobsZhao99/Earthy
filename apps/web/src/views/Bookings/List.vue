@@ -34,6 +34,8 @@ async function load() {
     if (q.value.to) params.to = q.value.to;
 
     const res = await api.get('/bookings?' + new URLSearchParams(params).toString());
+    console.log("✅ /bookings response:", res); // 👈 加这行看看字段结构
+
     data.value = res;
   } finally {
     loading.value = false;
@@ -65,13 +67,27 @@ watch(q, () => load(), { deep: true });
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
-    <el-table-column label="Property" width="240" :formatter="(_, __, row) => row?.room?.property?.name || ''" />
+    <el-table-column label="Property" prop="room.property.name" width="240" />
     <el-table-column label="Room" prop="room.label" width="120" />
-    <el-table-column label="Guest" :formatter="(_, __, row) => row?.guest?.name || ''" width="160" />
-    <el-table-column label="Check In" :formatter="(_, __, row) => fmt(row?.checkIn)" width="180" />
-    <el-table-column label="Check Out" :formatter="(_, __, row) => fmt(row?.checkOut)" width="180" />
+    <el-table-column label="Guest" prop="guest.name" width="160" />
+    <el-table-column label="Confirmation Code" prop="confirmationCode" width="160" />
+    <el-table-column label="Check In" prop="checkIn" width="180" />
+    <el-table-column label="Check Out" prop="checkOut" width="180" />
     <el-table-column label="Channel" prop="channel" width="130" />
-    <el-table-column label="Payout" :formatter="(_, __, row) => (row?.payoutCents ?? 0) / 100" width="110" />
+    <el-table-column
+      label="Payout"
+      :formatter="(row) => {
+        // console.log('💰 payout row:', row);
+        return row?.payoutCents != null ? '$' + (row.payoutCents / 100).toFixed(2) : '';
+      }"
+      width="120"
+    />
+
+    <el-table-column
+      label="Guest Total"
+      :formatter="(row) => row?.guestTotalCents != null ? '$' + (row.guestTotalCents / 100).toFixed(2) : ''"
+      width="120"
+    />
   </el-table>
 
   <div class="mt-3 flex justify-end">

@@ -10,7 +10,7 @@ async function load() {
   loading.value = true;
   try {
     const res = await api.get('/properties', { params: { pageSize: 500 } });
-    data.value.rows = res.data.rows ?? res.data ?? [];
+    data.value.rows = res.rows ?? res ?? [];
   } finally {
     loading.value = false;
   }

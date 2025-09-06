@@ -12,20 +12,27 @@ export interface Guest { id: ID; name: string; email?: string | null; phone?: st
 export type Channel = 'AIRBNB'|'BOOKING_COM'|'EXPEDIA'|'DIRECT'|'LEASING_CONTRACT'|'OTHER';
 export type BookingRecordStatus = 'NEW'|'TRANSFER'|'CANCELL';
 
+
+
 export interface BookingRecord {
-  id: ID;
-  roomId: ID;
-  guestId: ID;
-  checkIn: string;  // ISO
-  checkOut: string; // ISO
-  status: BookingRecordStatus;
-  channel: Channel;
-  guestTotalCents?: number | null;
-  payoutCents?: number | null;
-  confirmationCode?: string | null;
-  contractUrl?: string | null;
-  room?: Room;
-  guest?: Guest;
+  id: string;
+  checkIn: string;
+  checkOut: string;
+  payoutCents?: number;
+  channel?: string;
+  guest?: {
+    id: string;
+    name: string;
+    confirmationCode?: string;
+  };
+  room?: {
+    id: string;
+    label: string;
+    property?: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface Paged<T> { page: number; pageSize: number; total: number; rows: T[]; }
