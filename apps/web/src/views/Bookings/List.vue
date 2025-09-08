@@ -1,57 +1,61 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { api } from '../../api';
-import type { Paged, BookingRecord, Property } from '../../types';
-import { DateTime } from 'luxon';
-import { useRouter } from 'vue-router';
+  import { ref, onMounted, watch } from 'vue';
+  import { api } from '../../api';
+  import type { Paged, BookingRecord, Property } from '../../types';
+  import { DateTime } from 'luxon';
+  import { useRouter } from 'vue-router';
 
-const router = useRouter();
-const loading = ref(false);
+  const router = useRouter();
+  const loading = ref(false);
+  // 计算日期区间
+  const today = DateTime.now();
+  const defaultFrom = today.minus({ days: 15 }).toFormat('yyyy-LL-dd');
+  const defaultTo = today.plus({ days: 15 }).toFormat('yyyy-LL-dd');
 
-const q = ref({
-  propertyId: '',
-  from: '',
-  to: '',
-  page: 1,
-  pageSize: 1000,
-});
+  const q = ref({
+    propertyId: '',
+    from: defaultFrom,
+    to: defaultTo,
+    page: 1,
+    pageSize: 1000,
+  });
 
-const properties = ref<Property[]>([]);
-const data = ref<Paged<BookingRecord>>({ page:1, pageSize:20, total:0, rows:[] });
+  const properties = ref<Property[]>([]);
+  const data = ref<Paged<BookingRecord>>({ page:1, pageSize:1000, total:0, rows:[] });
 
-async function loadProperties() {
-  const res = await api.get('/properties');
-  // console.log(res);
-  properties.value = res.rows ?? res ?? [];
-}
-
-async function load() {
-  loading.value = true;
-  try {
-    const params: any = { page: q.value.page, pageSize: q.value.pageSize };
-    if (q.value.propertyId) params.propertyId = q.value.propertyId;
-    if (q.value.from) params.from = q.value.from;
-    if (q.value.to) params.to = q.value.to;
-
-    const res = await api.get('/bookings?' + new URLSearchParams(params).toString());
-    console.log("✅ /bookings response:", res); // 👈 加这行看看字段结构
-
-    data.value = res;
-  } finally {
-    loading.value = false;
+  async function loadProperties() {
+    const res = await api.get('/properties');
+    // console.log(res);
+    properties.value = res.rows ?? res ?? [];
   }
-}
 
-function fmtDate(dt: string) {
-  return DateTime.fromISO(dt).toFormat('yyyy-LL-dd');
-}
+  async function load() {
+    loading.value = true;
+    try {
+      const params: any = { page: q.value.page, pageSize: q.value.pageSize };
+      if (q.value.propertyId) params.propertyId = q.value.propertyId;
+      if (q.value.from) params.from = q.value.from;
+      if (q.value.to) params.to = q.value.to;
 
-onMounted(async () => {
-  await loadProperties();
-  await load();
-});
+      const res = await api.get('/bookings?' + new URLSearchParams(params).toString());
+      // console.log("✅ /bookings response:", res); // 👈 加这行看看字段结构
 
-watch(q, () => load(), { deep: true });
+      data.value = res;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function fmtDate(dt: string) {
+    return DateTime.fromISO(dt).toFormat('yyyy-LL-dd');
+  }
+
+  onMounted(async () => {
+    await loadProperties();
+    await load();
+  });
+
+  watch(q, () => load(), { deep: true });
 </script>
 
 <template>

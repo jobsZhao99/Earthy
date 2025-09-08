@@ -1,45 +1,74 @@
-// src/routes/reports.ts
-import { Router } from "express";
-import { prisma } from "../prisma.js";
-import { monthStartUTC, nextMonthUTC } from "../utils/dates.js";
-import { AccountCode } from "@prisma/client";
+// apps/api/src/routes/reports.js
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import { DateTime } from 'luxon';
 
-const r = Router();
+const router = express.Router();
+const prisma = new PrismaClient();
 
-/** GET /api/reports/monthly?from=YYYY-MM&to=YYYY-MM&propertyId=... */
-r.get("/monthly", async (req, res) => {
-  const { from, to, propertyId } = req.query as any;
-  if (!from || !to) return res.status(400).json({ error: "from/to required (YYYY-MM)" });
+router.get('/ledger-summary', async (req, res) => {
+  try {
+    const year = parseInt(req.query.year);
+    const month = parseInt(req.query.month);
+    if (!year || !month) return res.status(400).json({ error: 'Missing year or month' });
 
-  const [fy, fm] = String(from).split("-").map(Number);
-  const [ty, tm] = String(to).split("-").map(Number);
-  const fromUTC = monthStartUTC(fy, fm);
-  const toUTC   = monthStartUTC(ty, tm);
+    const start = DateTime.utc(year, month, 1).toJSDate();
+    const end = DateTime.utc(year, month, 1).endOf('month').toJSDate();
 
-  const rows = await prisma.$queryRawUnsafe<any[]>(`
-    SELECT
-      date_trunc('month', j."periodMonth")::date AS month,
-      p."name" AS property,
-      r."label" AS room,
-      SUM(CASE WHEN jl."account" = '${AccountCode.RENT}'     THEN jl."amountCents" ELSE 0 END) AS rent_cents,
-      SUM(CASE WHEN jl."account" = '${AccountCode.PARKING}'  THEN jl."amountCents" ELSE 0 END) AS parking_cents,
-      SUM(CASE WHEN jl."account" = '${AccountCode.BEDDING}'  THEN jl."amountCents" ELSE 0 END) AS bedding_cents,
-      SUM(CASE WHEN jl."account" = '${AccountCode.CLEANING}' THEN jl."amountCents" ELSE 0 END) AS cleaning_cents,
-      SUM(CASE WHEN jl."account" = '${AccountCode.OTHERS}'   THEN jl."amountCents" ELSE 0 END) AS others_cents,
-      SUM(jl."amountCents") AS net_cents
-    FROM "JournalEntry" j
-    JOIN "JournalLine" jl ON jl."journalId" = j."id"
-    JOIN "BookingRecord" b ON b."id" = jl."bookingId"
-    JOIN "Room" r ON r."id" = b."roomId"
-    JOIN "Property" p ON p."id" = r."propertyId"
-    WHERE j."periodMonth" >= $1
-      AND j."periodMonth" <= $2
-      ${propertyId ? `AND p."id" = '${propertyId}'` : ""}
-    GROUP BY 1,2,3
-    ORDER BY 1,2,3
-  `, fromUTC, toUTC);
+    // 找出该月所有 journalEntry
+    const entries = await prisma.journalEntry.findMany({
+      where: {
+        periodMonth: {
+          gte: start,
+          lte: end,
+        },
+      },
+      select: {
+        id: true,
+        ledgerId: true,
+        ledger: { select: { name: true } },
+      },
+    });
 
-  res.json({ rows });
+    if (entries.length === 0) return res.json({ rows: [] });
+
+    const sums = await prisma.journalLine.groupBy({
+      by: ['journalId'],
+      where: { journalId: { in: entries.map(e => e.id) } },
+      _sum: { amountCents: true },
+    });
+
+    const sumMap = new Map(sums.map(s => [s.journalId, s._sum.amountCents ?? 0]));
+
+    const rows = entries.map(e => ({
+      ledgerName: e.ledger?.name || '',
+      ledgerId: e.ledgerId,
+      journalId: e.id,
+      amountCents: sumMap.get(e.id) ?? 0,
+    }));
+
+    // 聚合按 ledger
+    const groupMap = new Map();
+    for (const row of rows) {
+      const key = row.ledgerId;
+      if (!groupMap.has(key)) {
+        groupMap.set(key, {
+          ledgerId: row.ledgerId,
+          ledgerName: row.ledgerName,
+          amountCents: 0,
+          count: 0,
+        });
+      }
+      const g = groupMap.get(key);
+      g.amountCents += row.amountCents;
+      g.count += 1;
+    }
+
+    res.json({ rows: Array.from(groupMap.values()) });
+  } catch (err) {
+    console.error('ledger-summary error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-export default r;
+export default router;
