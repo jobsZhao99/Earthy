@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 
 router.get('/ledger-summary', async (req, res) => {
   try {
-    const year = parseInt(req.query.year);
-    const month = parseInt(req.query.month);
+    const year = (req.query.year as string) || new Date().getFullYear().toString();
+    const month = (req.query.month as string) || (new Date().getMonth() + 1).toString();
     if (!year || !month) return res.status(400).json({ error: 'Missing year or month' });
 
     const start = DateTime.utc(year, month, 1).toJSDate();
