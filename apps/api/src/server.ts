@@ -99,7 +99,7 @@ app.get('/api/healthz', (_req, res) => res.json({ ok: true }));
 
 // API 路由统一挂在 /api 前缀下
 app.use('/api/bookings', bookings);
-app.use('/api/bookings', todayBookings);
+app.use('/api', todayBookings);
 
 app.use('/api/tasks', posting);
 app.use('/api/properties', properties);

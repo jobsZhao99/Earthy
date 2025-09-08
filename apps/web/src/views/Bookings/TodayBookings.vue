@@ -22,7 +22,7 @@ async function loadData() {
     const params: any = {};
     if (selectedProperty.value) params.propertyId = selectedProperty.value;
 
-    const res = await api.get('/bookings/today-bookings/?' + new URLSearchParams(params));
+    const res = await api.get('/today-bookings?' + new URLSearchParams(params));
     const rows: BookingRecord[] = res.rows ?? res;
 
     checkInRows.value = rows.filter(r => r.checkIn?.startsWith(today));
