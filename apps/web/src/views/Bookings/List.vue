@@ -13,7 +13,7 @@ const q = ref({
   from: '',
   to: '',
   page: 1,
-  pageSize: 20,
+  pageSize: 1000,
 });
 
 const properties = ref<Property[]>([]);
@@ -42,8 +42,8 @@ async function load() {
   }
 }
 
-function fmt(dt: string) {
-  return DateTime.fromISO(dt).toFormat('yyyy-LL-dd HH:mm');
+function fmtDate(dt: string) {
+  return DateTime.fromISO(dt).toFormat('yyyy-LL-dd');
 }
 
 onMounted(async () => {
@@ -62,18 +62,28 @@ watch(q, () => load(), { deep: true });
 
     <el-date-picker v-model="q.from" type="date" placeholder="From" value-format="YYYY-MM-DD" />
     <el-date-picker v-model="q.to" type="date" placeholder="To" value-format="YYYY-MM-DD" />
+    
 
     <el-button type="primary" @click="router.push('/bookings/new')">New Booking</el-button>
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
-    <el-table-column label="Property" prop="room.property.name" width="240" />
-    <el-table-column label="Room" prop="room.label" width="120" />
-    <el-table-column label="Guest" prop="guest.name" width="160" />
+    <el-table-column label="Confirm Date" prop="createdAt" :formatter="(row) => fmtDate(row?.createdAt)" sortable
+      width="180"
+    />
+    <el-table-column label="Property" prop="room.property.name" sortable width="240" />
+    <el-table-column label="Room" prop="room.label" sortable width="120" />
+    <el-table-column label="Guest" prop="guest.name" sortable width="160" >
+      <template #default="{ row }">
+        <router-link :to="`/guests/${row.guestId}`" class="text-blue-500 hover:underline">
+          {{ row.guest?.name || '-' }}
+        </router-link>
+      </template>
+    </el-table-column>
     <el-table-column label="Confirmation Code" prop="confirmationCode" width="160" />
-    <el-table-column label="Check In" prop="checkIn" width="180" />
-    <el-table-column label="Check Out" prop="checkOut" width="180" />
-    <el-table-column label="Channel" prop="channel" width="130" />
+    <el-table-column label="Check In" prop="checkIn" sortable width="180" />
+    <el-table-column label="Check Out" prop="checkOut" sortable width="180" />
+    <el-table-column label="Channel" prop="channel" sortable width="130" />
     <el-table-column
       label="Payout"
       :formatter="(row) => {
@@ -93,7 +103,7 @@ watch(q, () => load(), { deep: true });
   <div class="mt-3 flex justify-end">
     <el-pagination
       layout="prev, pager, next, sizes, total"
-      :page-sizes="[10,20,50,100]"
+      :page-sizes="[10,20,50,100,1000]"
       v-model:current-page="q.page"
       v-model:page-size="q.pageSize"
       :total="data.total"
