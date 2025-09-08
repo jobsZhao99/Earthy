@@ -19,6 +19,8 @@ onMounted(async () => {
       <el-menu mode="horizontal" router>
         <el-menu-item index="/">Bookings</el-menu-item>
         <el-menu-item index="/properties">Properties</el-menu-item>
+        <el-menu-item index="/report">Report</el-menu-item>
+
       </el-menu>
     </el-header>
     <el-main>

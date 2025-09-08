@@ -1,4 +1,4 @@
-// apps/api/src/routes/reports.js
+// apps/api/src/routes/reports.ts
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { DateTime } from 'luxon';
@@ -8,14 +8,15 @@ const prisma = new PrismaClient();
 
 router.get('/ledger-summary', async (req, res) => {
   try {
-    const year = (req.query.year as string) || new Date().getFullYear().toString();
-    const month = (req.query.month as string) || (new Date().getMonth() + 1).toString();
-    if (!year || !month) return res.status(400).json({ error: 'Missing year or month' });
+    const fromStr = req.query.from as string;
+    const toStr = req.query.to as string;
 
-    const start = DateTime.utc(year, month, 1).toJSDate();
-    const end = DateTime.utc(year, month, 1).endOf('month').toJSDate();
+    if (!fromStr || !toStr) return res.status(400).json({ error: 'Missing from/to' });
 
-    // 找出该月所有 journalEntry
+    const start = DateTime.fromFormat(fromStr, 'yyyy-MM', { zone: 'utc' }).startOf('month').toJSDate();
+    const end = DateTime.fromFormat(toStr, 'yyyy-MM', { zone: 'utc' }).endOf('month').toJSDate();
+
+    // 找出该时间段内所有 journalEntry
     const entries = await prisma.journalEntry.findMany({
       where: {
         periodMonth: {
@@ -47,7 +48,7 @@ router.get('/ledger-summary', async (req, res) => {
       amountCents: sumMap.get(e.id) ?? 0,
     }));
 
-    // 聚合按 ledger
+    // 聚合按 ledgerId 分组
     const groupMap = new Map();
     for (const row of rows) {
       const key = row.ledgerId;
