@@ -17,6 +17,7 @@ onMounted(async () => {
   <el-container style="min-height: 100vh">
     <el-header>
       <el-menu mode="horizontal" router>
+        <el-menu-item index="/today-bookings">Today</el-menu-item>
         <el-menu-item index="/">Bookings</el-menu-item>
         <el-menu-item index="/properties">Properties</el-menu-item>
         <el-menu-item index="/report">Report</el-menu-item>

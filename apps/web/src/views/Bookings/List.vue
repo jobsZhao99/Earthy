@@ -4,6 +4,7 @@
   import type { Paged, BookingRecord, Property } from '../../types';
   import { DateTime } from 'luxon';
   import { useRouter } from 'vue-router';
+import { channel } from 'diagnostics_channel';
 
   const router = useRouter();
   const loading = ref(false);
@@ -17,6 +18,7 @@
     from: defaultFrom,
     to: defaultTo,
     page: 1,
+    channel: '',
     pageSize: 1000,
   });
 
@@ -66,7 +68,10 @@
 
     <el-date-picker v-model="q.from" type="date" placeholder="From" value-format="YYYY-MM-DD" />
     <el-date-picker v-model="q.to" type="date" placeholder="To" value-format="YYYY-MM-DD" />
-    
+    <el-select v-model="q.channel" placeholder="Channel" clearable filterable style="width:280px">
+      <el-option v-for="p in properties" :key="p.id" :label="p.name" :value="p.id" />
+    </el-select>
+
 
     <el-button type="primary" @click="router.push('/bookings/new')">New Booking</el-button>
   </div>

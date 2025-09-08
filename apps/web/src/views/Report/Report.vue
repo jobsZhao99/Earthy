@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { api } from '../../api';
 import { DateTime } from 'luxon';
 
@@ -19,6 +19,7 @@ const months = computed(() => {
   const result: string[] = [];
   let d = DateTime.fromFormat(from.value, 'yyyy-MM');
   const end = DateTime.fromFormat(to.value, 'yyyy-MM');
+  console.log('Generating months from', d.toISODate(), 'to', end.toISODate());
   while (d <= end) {
     result.push(d.toFormat('yyyy-MM'));
     d = d.plus({ months: 1 });
@@ -36,6 +37,9 @@ async function load() {
   loading.value = false;
 }
 
+
+watch([from, to], load);
+
 onMounted(load);
 </script>
 
@@ -46,16 +50,14 @@ onMounted(load);
       type="month"
       placeholder="From"
       format="YYYY-MM"
-      value-format="yyyy-MM"
-      @change="load"
+      value-format="YYYY-MM"
     />
     <el-date-picker
       v-model="to"
       type="month"
       placeholder="To"
       format="YYYY-MM"
-      value-format="yyyy-MM"
-      @change="load"
+      value-format="YYYY-MM"
     />
   </div>
 
