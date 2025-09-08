@@ -13,7 +13,7 @@ import properties from './routes/properties.js';
 // import reports from './routes/reports.js';
 // import ledgers from './routes/ledgers.js';
 // import rooms from './routes/rooms.js';
-// import guests from './routes/guests.js';
+import guests from './routes/guests.js';
 // import journals from './routes/journals.js';
 
 // ------ CORS 允许来源（清洗环境变量中的引号和尾斜杠） ------
@@ -103,7 +103,7 @@ app.use('/api/properties', properties);
 // app.use('/api/reports', reports);
 // app.use('/api/ledgers', ledgers);
 // app.use('/api/rooms', rooms);
-// app.use('/api/guests', guests);
+app.use('/api/guests', guests);
 // app.use('/api/journals', journals);
 
 // 404 兜底（API）
