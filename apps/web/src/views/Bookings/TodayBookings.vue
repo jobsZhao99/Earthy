@@ -19,16 +19,12 @@ async function loadProperties() {
 async function loadData() {
   loading.value = true;
   try {
-    const params: any = {
-      from: today,
-      to: today,
-      pageSize: 1000,
-    };
+    const params: any = {};
     if (selectedProperty.value) params.propertyId = selectedProperty.value;
 
-    const res = await api.get('/bookings?' + new URLSearchParams(params).toString());
+    const res = await api.get('/bookings/today-bookings/?' + new URLSearchParams(params));
     const rows: BookingRecord[] = res.rows ?? res;
-    console.log("✅ /bookings response:", rows);
+
     checkInRows.value = rows.filter(r => r.checkIn?.startsWith(today));
     checkOutRows.value = rows.filter(r => r.checkOut?.startsWith(today));
   } finally {

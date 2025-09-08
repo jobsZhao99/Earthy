@@ -10,7 +10,7 @@ const todayStart = DateTime.now().startOf('day').toISO();      // 2025-09-08T00:
 const tomorrowStart = DateTime.now().plus({ days: 1 }).startOf('day').toISO(); // 2025-09-09T00:00:00.000Z
 
 // GET /api/reports/checkins-today
-router.get('/reports/checkins-today', async (req, res) => {
+router.get('/today-bookings', async (req, res) => {
   try {
     const { propertyId } = req.query;
     const today = DateTime.now().toISODate(); // e.g. "2025-09-08"
