@@ -17,12 +17,28 @@ r.get("/", async (req, res) => {
   if (channel) where.channel = String(channel);
   if (status) where.status = String(status);
   if (propertyId) where.room = { propertyId: String(propertyId) };
-  if (from || to) {
-    where.AND = [
-      { checkOut: { gte: from ? new Date(String(from)) : undefined } },
-      { checkIn:  { lt:  to ? new Date(String(to))   : undefined } },
-    ];
+// checkIn OR checkOut 在 from - to 之间
+if (from || to) {
+  const fromDate = from ? new Date(String(from)) : undefined;
+  const toDate = to ? new Date(String(to)) : undefined;
+
+  const checkInRange: any = {};
+  const checkOutRange: any = {};
+
+  if (fromDate) {
+    checkInRange.gte = fromDate;
+    checkOutRange.gte = fromDate;
   }
+  if (toDate) {
+    checkInRange.lte = toDate;
+    checkOutRange.lte = toDate;
+  }
+
+  where.OR = [
+    { checkIn: checkInRange },
+    { checkOut: checkOutRange },
+  ];
+}
   if (q) {
     where.OR = [
       { confirmationCode: { contains: String(q), mode: "insensitive" } },

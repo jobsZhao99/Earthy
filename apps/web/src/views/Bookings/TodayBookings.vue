@@ -49,6 +49,8 @@ onMounted(async () => {
 
   <h2 class="text-lg font-bold mb-2">🏡 Today Check-in</h2>
   <el-table :data="checkInRows" v-loading="loading" border>
+    <el-table-column label="Property" prop="room.property.name" />
+
     <el-table-column label="Room" prop="room.label" />
     <el-table-column label="Guest" prop="guest.name" />
     <el-table-column label="Check In" prop="checkIn" />
@@ -58,6 +60,8 @@ onMounted(async () => {
 
   <h2 class="text-lg font-bold mt-6 mb-2">🚪 Today Check-out</h2>
   <el-table :data="checkOutRows" v-loading="loading" border>
+    <el-table-column label="Property" prop="room.property.name" />
+
     <el-table-column label="Room" prop="room.label" />
     <el-table-column label="Guest" prop="guest.name" />
     <el-table-column label="Check In" prop="checkIn" />
