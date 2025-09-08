@@ -78,7 +78,7 @@ router.get('/ledger-summary', async (req, res) => {
 
     // 转换为 frontend 需要的格式：每个 ledger 一行
     const final = Array.from(grouped.values()).reduce((acc, curr) => {
-      let existing = acc.find(x => x.ledgerId === curr.ledgerId);
+      let existing = acc.find((x: any) => x.ledgerId === curr.ledgerId);
       if (!existing) {
         existing = {
           ledgerId: curr.ledgerId,
