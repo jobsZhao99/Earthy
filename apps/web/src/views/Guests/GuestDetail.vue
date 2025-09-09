@@ -46,6 +46,8 @@ onMounted(() => {
         />
         <el-table-column label="Property" prop="room.property.name" width="220" />
         <el-table-column label="Room" prop="room.label" width="100" />
+        <el-table-column label="Cleaning Status" prop="room.cleaningStatus" width="100" />
+
         <el-table-column label="Confirmation Code" prop="confirmationCode" width="160" />
         <el-table-column label="Check In" :formatter="row => fmt(row.checkIn)" width="140" />
         <el-table-column label="Check Out" :formatter="row => fmt(row.checkOut)" width="140" />

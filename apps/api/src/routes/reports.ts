@@ -22,7 +22,7 @@ router.get('/ledger-summary', async (req, res) => {
     const start = startLuxon.startOf('month').toJSDate();
     const end = endLuxon.endOf('month').toJSDate();
 
-    console.log('Fetching journalEntry...');
+    // console.log('Fetching journalEntry...');
     const entries = await prisma.journalEntry.findMany({
       where: {
         periodMonth: {

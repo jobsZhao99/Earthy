@@ -11,10 +11,14 @@ import bookings from './routes/bookings.js';
 import posting from './routes/posting.js';
 import properties from './routes/properties.js';
 import reports from './routes/reports.js';
+import reportsMultiProperties from './routes/reportsMultiProperties.js';
+import propertyListRoutes from './routes/propertiesList.js';
+
 // import ledgers from './routes/ledgers.js';
 // import rooms from './routes/rooms.js';
 import guests from './routes/guests.js';
 import todayBookings from './routes/today-bookings.js';
+
 // import journals from './routes/journals.js';
 
 // ------ CORS 允许来源（清洗环境变量中的引号和尾斜杠） ------
@@ -103,7 +107,10 @@ app.use('/api', todayBookings);
 
 app.use('/api/tasks', posting);
 app.use('/api/properties', properties);
+app.use('/api/propertieslist', propertyListRoutes);
+
 app.use('/api/reports', reports);
+app.use('/api/reports-multi-properties', reportsMultiProperties);
 // app.use('/api/ledgers', ledgers);
 // app.use('/api/rooms', rooms);
 app.use('/api/guests', guests);

@@ -6,11 +6,13 @@ const r = Router();
 
 /** 列表 + 过滤 ledger / 搜索 */
 r.get("/", async (req, res) => {
-  const { ledgerId, q } = req.query as any;
+  const { ledgerId, search } = req.query as any;
+  // console.log({req});
   const { skip, take, page, pageSize } = getPagination(req.query);
+  // console.log({ ledgerId, search, skip, take, page, pageSize });
   const where: any = {};
   if (ledgerId) where.ledgerId = String(ledgerId);
-  if (q) where.name = { contains: String(q), mode: "insensitive" };
+  if (search) where.name = { contains: String(search), mode: "insensitive" };
 
   const [rows, total] = await Promise.all([
     prisma.property.findMany({

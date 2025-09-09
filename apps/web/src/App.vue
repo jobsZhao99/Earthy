@@ -21,6 +21,8 @@ onMounted(async () => {
         <el-menu-item index="/">Bookings</el-menu-item>
         <el-menu-item index="/properties">Properties</el-menu-item>
         <el-menu-item index="/report">Report</el-menu-item>
+        <el-menu-item index="/property-report">Property Report</el-menu-item>
+
 
       </el-menu>
     </el-header>

@@ -38,6 +38,19 @@ enum Channel {
   OTHER
 }
 
+enum CleaningStatus {
+  DIRTY
+  OCCUPIED
+  CLEAN
+}
+
+enum LeasingStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  OFF_MARKET
+}
+
 model Ledger {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -75,9 +88,13 @@ model Room {
 
   bookings    BookingRecord[]
 
+  cleaningStatus CleaningStatus @default(DIRTY)
+  leasingStatus  LeasingStatus  @default(AVAILABLE)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+
   
   @@unique([propertyId, label])
 }
