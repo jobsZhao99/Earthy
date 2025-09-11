@@ -1,39 +1,43 @@
 import { Router } from "express";
 import { prisma } from "../prisma.js";
 import { getPagination } from "../utils/pagination.js";
+import { Prisma } from "@prisma/client";   // ✅ 必须引入 Prisma
 
 const r = Router();
 
 /** 列表 + 搜索 */
-r.get('/', async (req, res) => {
+r.get("/", async (req, res) => {
   const pageRaw = req.query.page;
   const pageSizeRaw = req.query.pageSize;
-  
-  const page = typeof pageRaw === 'string' ? parseInt(pageRaw) : 1;
-  const pageSize = typeof pageSizeRaw === 'string' ? parseInt(pageSizeRaw) : 20;
+
+  const page = typeof pageRaw === "string" ? parseInt(pageRaw) : 1;
+  const pageSize = typeof pageSizeRaw === "string" ? parseInt(pageSizeRaw) : 20;
 
   const rawSearch = req.query.search;
-  const search = typeof rawSearch === 'string' ? rawSearch.toLowerCase().trim() : '';
-  const includeBookingCount = req.query.includeBookingCount === 'true';
+  const search = typeof rawSearch === "string" ? rawSearch.toLowerCase().trim() : "";
+  const includeBookingCount = req.query.includeBookingCount === "true";
 
-  const where = keyword
-  ? {
-      OR: [
-        { name: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
-        { email: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
-        { phone: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
-      ],
-    }
-  : {};
+  // ✅ 用 search 代替 keyword
+  const where = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+          { phone: { contains: search, mode: Prisma.QueryMode.insensitive } },
+        ],
+      }
+    : {};
 
   const [rows, total] = await Promise.all([
     prisma.guest.findMany({
       where,
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: includeBookingCount ? { _count: { select: { bookings: true } } } : {}
+      include: includeBookingCount
+        ? { _count: { select: { bookings: true } } }
+        : {},
     }),
-    prisma.guest.count({ where })
+    prisma.guest.count({ where }),
   ]);
 
   res.json({ rows, total });
@@ -64,7 +68,10 @@ r.post("/", async (req, res) => {
 
 /** 更新 */
 r.patch("/:id", async (req, res) => {
-  const updated = await prisma.guest.update({ where: { id: req.params.id }, data: req.body });
+  const updated = await prisma.guest.update({
+    where: { id: req.params.id },
+    data: req.body,
+  });
   res.json(updated);
 });
 

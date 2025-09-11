@@ -7,11 +7,8 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+
 export const prisma =
-  global.prisma ||
-  new PrismaClient({
-    // 可酌情打开日志
-    // log: ["query", "error", "warn"]
-  });
+  global.prisma || new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") global.prisma = prisma;
