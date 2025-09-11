@@ -1,8 +1,15 @@
 // src/utils/pagination.ts
-export function getPagination(query) {
-  const page = parseInt(query.page) || 1;
-  const pageSize = parseInt(query.pageSize) || 20;
+import { ParsedQs } from "qs";
+
+export function getPagination(query: ParsedQs) {
+  const pageRaw = query.page;
+  const pageSizeRaw = query.pageSize;
+
+  const page = typeof pageRaw === 'string' ? parseInt(pageRaw) : 1;
+  const pageSize = typeof pageSizeRaw === 'string' ? parseInt(pageSizeRaw) : 20;
+
   const skip = (page - 1) * pageSize;
   const take = pageSize;
+
   return { skip, take, page, pageSize };
 }

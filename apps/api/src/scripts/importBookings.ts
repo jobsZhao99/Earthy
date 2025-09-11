@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient, Channel, BookingRecordStatus } from '@prisma/client';
+import { PrismaClient, Channel, BookingRecordType,BookingStatus } from '@prisma/client';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DateTime } from 'luxon';
@@ -246,7 +246,8 @@ async function main() {
           payoutCents,
           confirmationCode: row.confirmationCode || null,
           contractUrl: null,
-          status: BookingRecordStatus.NEW,
+          type: BookingRecordType.NEW,
+          status: BookingStatus.FUTURE,
           memo
         }
       });

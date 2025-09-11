@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Channel, BookingRecordStatus } from '@prisma/client';
+import { Channel, BookingRecordType } from '@prisma/client';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DateTime } from 'luxon';
@@ -248,7 +248,7 @@ async function main() {
             roomId, guestId, checkIn, checkOut, channel,
             guestTotalCents, payoutCents,
             confirmationCode: r.confirmationCode || null,
-            contractUrl: null, status: BookingRecordStatus.NEW, memo,
+            contractUrl: null, status: BookingRecordType.NEW, memo,
             createdAt: r.confirmedDate ? parseLADate(r.confirmedDate) : undefined
           },
           select: { id: true }
