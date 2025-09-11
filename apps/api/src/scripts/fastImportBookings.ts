@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Channel, BookingRecordType } from '@prisma/client';
+import { Channel, BookingRecordType, BookingStatus } from '@prisma/client';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DateTime } from 'luxon';
@@ -136,14 +136,14 @@ async function main() {
     console.error(`❌ 找不到文件：${filePath}`);
     process.exit(1);
   }
-    console.log('没有可导入的行。');
+  console.log('没有可导入的行。');
 
   const rows = parseTable(filePath);
   if (!rows.length) {
     console.log('没有可导入的行。');
     // return;
-  }{
-    console.log('行数：',rows.length);
+  } {
+    console.log('行数：', rows.length);
   }
 
   const bar = new cliProgress.SingleBar(
@@ -248,7 +248,7 @@ async function main() {
             roomId, guestId, checkIn, checkOut, channel,
             guestTotalCents, payoutCents,
             confirmationCode: r.confirmationCode || null,
-            contractUrl: null, status: BookingRecordType.NEW, memo,
+            contractUrl: null, type: BookingRecordType.NEW, status: BookingStatus.FUTURE, memo,
             createdAt: r.confirmedDate ? parseLADate(r.confirmedDate) : undefined
           },
           select: { id: true }
