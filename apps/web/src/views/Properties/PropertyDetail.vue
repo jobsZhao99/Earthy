@@ -48,19 +48,18 @@ onMounted(loadDetail);
 
     <h2 class="text-xl font-bold mt-6 mb-2">Bookings</h2>
     <el-table :data="bookings" border>
-      <el-table-column label="Room" prop="room.label" width="120" />
+      <!-- <el-table-column label="Room" prop="room.label" width="120" /> -->
       <el-table-column label="Room">
         <template #default="{ row }">
           <RoomLink :room="row.room" />
         </template>
       </el-table-column>
-      <el-table-column label="Guest" prop="guest.name" width="160" />
-      <el-table-column label="Check In" prop="checkIn" :formatter="row => fmtDate(row.checkIn)" width="180" />
-      <el-table-column label="Check Out" prop="checkOut" :formatter="row => fmtDate(row.checkOut)" width="180" />
-      <el-table-column label="Channel" prop="channel" width="130" />
+      <el-table-column label="Guest" prop="guest.name" />
+      <el-table-column label="Check In" prop="checkIn" :formatter="row => fmtDate(row.checkIn)" sortable />
+      <el-table-column label="Check Out" prop="checkOut" :formatter="row => fmtDate(row.checkOut)" sortable />
+      <el-table-column label="Channel" prop="channel" />
       <el-table-column label="Guest Total"
-        :formatter="(row) => row?.guestTotalCents != null ? '$' + (row.guestTotalCents / 100).toFixed(2) : ''"
-        width="120" />
+        :formatter="(row) => row?.guestTotalCents != null ? '$' + (row.guestTotalCents / 100).toFixed(2) : ''" />
     </el-table>
   </div>
 </template>
