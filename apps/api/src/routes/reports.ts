@@ -38,7 +38,7 @@ router.get('/ledger-summary', async (req, res) => {
       },
     });
 
-    console.log('Entries:', entries.length);
+    // console.log('Entries:', entries.length);
     if (entries.length === 0) return res.json({ rows: [] });
 
     const sums = await prisma.journalLine.groupBy({

@@ -3,6 +3,7 @@ import { ref, onMounted, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '../../api';
 import type { Paged, Property } from '../../types';
+import PropertyLink from '../Properties/PropertyLink.vue';
 
 const router = useRouter();
 const loading = ref(false);
@@ -38,6 +39,8 @@ async function load() {
   } finally {
     loading.value = false;
   }
+
+  
 }
 
 
@@ -47,16 +50,25 @@ watch(() => [params.page, params.pageSize], load);
 
 <template>
   <el-table :data="data.rows" v-loading="loading" border>
-    <el-table-column label="Actions" width="150">
+    <!-- <el-table-column prop="name" label="Name" sortable >
       <template #default="{ row }">
-        <el-button size="small" type="primary" @click="router.push(`/properties/${row.id}`)">
-          View Detail
-        </el-button>
+        <router-link :to="`/properties/${row.id}`" class="text-blue-500 hover:underline">
+          {{ row.name || '-' }}
+        </router-link>
+        </template>
+    </el-table-column> -->
+
+    <el-table-column label="Name">
+      <template #default="{ row }">
+        <PropertyLink :property="row" />
       </template>
     </el-table-column>
-    <el-table-column prop="name" label="Name" />
-    <el-table-column prop="address" label="Address" />
-    <el-table-column prop="timezone" label="Timezone" width="220" />
+    <el-table-column prop="address" label="Address" sortable />
+    <el-table-column label="Room Count" width="120">
+      <template #default="{ row }">
+        {{ row.rooms?.length || 0 }}
+      </template>
+    </el-table-column>
   </el-table>
 
   <div class="mt-3 flex justify-end">

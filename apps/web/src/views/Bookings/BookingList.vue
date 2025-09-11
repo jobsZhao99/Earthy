@@ -77,6 +77,14 @@ import { channel } from 'diagnostics_channel';
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
+    <!-- <el-table-column label="Actions" width="80">
+      <template #default="{ row }">
+        <el-button size="small" type="primary" @click="router.push(`/bookings/${row.id}/edit`)">
+          Edit
+        </el-button>
+      </template>
+    </el-table-column> -->
+    <el-table-column label="Status" prop="status" sortable width="180"/>
     <el-table-column label="Confirm Date" prop="createdAt" :formatter="(row) => fmtDate(row?.createdAt)" sortable
       width="180"
     />
@@ -89,7 +97,13 @@ import { channel } from 'diagnostics_channel';
         </router-link>
       </template>
     </el-table-column>
-    <el-table-column label="Confirmation Code" prop="confirmationCode" width="160" />
+    <el-table-column label="Confirmation Code" prop="confirmationCode" width="160">
+      <template #default="{ row }">
+        <router-link :to="`/bookings/${row.id}`" class="text-blue-500 hover:underline">
+          {{ row.confirmationCode || '-' }}
+        </router-link>
+      </template>
+    </el-table-column>
     <el-table-column label="Check In" prop="checkIn" sortable width="180" />
     <el-table-column label="Check Out" prop="checkOut" sortable width="180" />
     <el-table-column label="Channel" prop="channel" sortable width="130" />

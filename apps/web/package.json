@@ -11,6 +11,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.11.0",
+    "dayjs": "^1.11.18",
     "element-plus": "^2.11.2",
     "luxon": "^3.7.2",
     "pinia": "^3.0.3",
@@ -20,6 +21,9 @@
   "devDependencies": {
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
     "vite": "^7.1.2"
   }
 }

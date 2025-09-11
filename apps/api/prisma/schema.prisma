@@ -9,13 +9,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum BookingRecordStatus {
+enum BookingRecordType {
   NEW
-  TRANSFER
+  TRANSFER_IN
+  TRANSFER_OUT
   CANCELL
 }
 
-
+enum BookingStatus {
+  FUTURE        // 已预订但未入住
+  CHECKED_IN    // 已入住
+  CHECKED_OUT   // 已退房
+  CANCELLED     // 已取消
+}
 
 
 
@@ -38,18 +44,21 @@ enum Channel {
   OTHER
 }
 
-enum CleaningStatus {
-  DIRTY
-  OCCUPIED
-  CLEAN
+enum RoomStatus {
+  CLEANED              // 已清洁，随时可用
+  CLEANING_SCHEDULED   // 已安排清洁，但还没完成
+
+  OCCUPIED             // 已入住
+  CHECKED_OUT_DIRTY          // 已退房，但还没清洁
+
+  ON_HOLD              // 暂时锁定，不对外出租（例如维修/房东保留）
+  MAINTENANCE          // 维修中
+  OFF_MARKET           // 永久下架，不对外出租
+
+  RESERVED             // 已预订，但客人还没入住
 }
 
-enum LeasingStatus {
-  AVAILABLE
-  OCCUPIED
-  MAINTENANCE
-  OFF_MARKET
-}
+
 
 model Ledger {
   id        String   @id @default(cuid())
@@ -88,8 +97,7 @@ model Room {
 
   bookings    BookingRecord[]
 
-  cleaningStatus CleaningStatus @default(DIRTY)
-  leasingStatus  LeasingStatus  @default(AVAILABLE)
+  cleaningStatus RoomStatus @default(CHECKED_OUT_DIRTY)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -116,7 +124,8 @@ model Guest {
 model BookingRecord {
     id            String   @id @default(cuid())
     roomId        String
-    status        BookingRecordStatus @default(NEW)
+    type          BookingRecordType   @default(NEW)
+    status        BookingStatus      @default(FUTURE) // 新增状态字段
     guestId       String
     checkIn       DateTime
     checkOut      DateTime

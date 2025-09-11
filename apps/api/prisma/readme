@@ -1,0 +1,48 @@
+                ┌──────────────┐
+                │   NEW        │   (BookingRecordType)
+                └──────┬───────┘
+                       │
+                       ▼
+                ┌──────────────┐
+                │   FUTURE     │   (BookingStatus, 已预订未入住)
+                └──────┬───────┘
+                       │ check-in 到达
+                       ▼
+                ┌──────────────┐
+                │ CHECKED_IN   │   (BookingStatus, 在住)
+                └──────┬───────┘
+                       │ check-out 离开
+                       ▼
+                ┌──────────────┐
+                │ CHECKED_OUT  │   (BookingStatus, 已退房)
+                └──────────────┘
+
+
+                ┌──────────────┐
+                │ TRANSFER_IN  │   (BookingRecordType)
+                └──────────────┘
+                        │
+                        ▼
+                ┌──────────────┐
+                │ FUTURE       │   (可进入 CHECKED_IN → CHECKED_OUT)
+                └──────────────┘
+
+
+                ┌──────────────┐
+                │ TRANSFER_OUT │   (BookingRecordType)
+                └──────────────┘
+                        │
+                        ▼
+                ┌──────────────┐
+                │ CANCELLED    │   (BookingStatus, 已取消)
+                └──────────────┘
+
+
+                ┌──────────────┐
+                │ CANCELL      │   (BookingRecordType)
+                └──────────────┘
+                        │
+                        ▼
+                ┌──────────────┐
+                │ CANCELLED    │   (BookingStatus, 已取消)
+                └──────────────┘

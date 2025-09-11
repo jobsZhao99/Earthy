@@ -5,7 +5,8 @@ import { useRoute } from 'vue-router';
 import { api } from '../../api';
 import type { Property, BookingRecord } from '../../types';
 import { DateTime } from 'luxon';
-
+import PropertyLink from '../Properties/PropertyLink.vue';
+import RoomLink from '../Rooms/RoomLink.vue';
 const route = useRoute();
 const propertyId = route.params.id as string;
 
@@ -48,24 +49,44 @@ onMounted(loadDetail);
     <h2 class="text-xl font-bold mt-6 mb-2">Bookings</h2>
     <el-table :data="bookings" border>
       <el-table-column label="Room" prop="room.label" width="120" />
+      <el-table-column label="Room">
+        <template #default="{ row }">
+          <RoomLink :room="row.room" />
+        </template>
+      </el-table-column>
       <el-table-column label="Guest" prop="guest.name" width="160" />
       <el-table-column label="Check In" prop="checkIn" :formatter="row => fmtDate(row.checkIn)" width="180" />
       <el-table-column label="Check Out" prop="checkOut" :formatter="row => fmtDate(row.checkOut)" width="180" />
       <el-table-column label="Channel" prop="channel" width="130" />
-      <el-table-column
-        label="Guest Total"
+      <el-table-column label="Guest Total"
         :formatter="(row) => row?.guestTotalCents != null ? '$' + (row.guestTotalCents / 100).toFixed(2) : ''"
-        width="120"
-      />
+        width="120" />
     </el-table>
   </div>
 </template>
 
 <style scoped>
-.text-xl { font-size: 1.25rem }
-.text-2xl { font-size: 1.5rem }
-.font-bold { font-weight: bold }
-.mt-6 { margin-top: 1.5rem }
-.mb-4 { margin-bottom: 1rem }
-.mb-2 { margin-bottom: 0.5rem }
+.text-xl {
+  font-size: 1.25rem
+}
+
+.text-2xl {
+  font-size: 1.5rem
+}
+
+.font-bold {
+  font-weight: bold
+}
+
+.mt-6 {
+  margin-top: 1.5rem
+}
+
+.mb-4 {
+  margin-bottom: 1rem
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem
+}
 </style>

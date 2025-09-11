@@ -7,6 +7,7 @@ const r = Router();
 /** 列表 + 过滤 propertyId / 搜索 */
 r.get("/", async (req, res) => {
   const { propertyId, q } = req.query as any;
+  // console.log('query =', req.query);
   const { skip, take, page, pageSize } = getPagination(req.query);
   const where: any = {};
   if (propertyId) where.propertyId = String(propertyId);

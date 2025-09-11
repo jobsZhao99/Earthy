@@ -11,6 +11,7 @@ import bookings from './routes/bookings.js';
 import posting from './routes/posting.js';
 import properties from './routes/properties.js';
 import reports from './routes/reports.js';
+import rooms from './routes/rooms.js';
 import reportsMultiProperties from './routes/reportsMultiProperties.js';
 import propertyListRoutes from './routes/propertiesList.js';
 
@@ -112,7 +113,7 @@ app.use('/api/propertieslist', propertyListRoutes);
 app.use('/api/reports', reports);
 app.use('/api/reports-multi-properties', reportsMultiProperties);
 // app.use('/api/ledgers', ledgers);
-// app.use('/api/rooms', rooms);
+app.use('/api/rooms', rooms);
 app.use('/api/guests', guests);
 // app.use('/api/journals', journals);
 

@@ -1,33 +1,83 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { api } from "./api";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "/api";
-// console.log("API_BASE", API_BASE);
-const health = ref<any>(null);
-const bookings = ref<any[]>([]);
+const searchQuery = ref('');
+const router = useRouter();
 
-onMounted(async () => {
-  health.value = await fetch(`${API_BASE}/healthz`).then(r => r.json()).catch(() => null);
-  bookings.value = await api.get("/bookings");
-});
+function handleSearch() {
+  const query = searchQuery.value.trim();
+  if (!query) return;
+  router.push({ path: '/search', query: { q: query } });
+}
+
+function goBack() {
+  router.back();
+}
+
+function goForward() {
+  router.forward();
+}
 </script>
 
 <template>
   <el-container style="min-height: 100vh">
-    <el-header>
-      <el-menu mode="horizontal" router>
+    <!-- 左侧菜单 -->
+    <el-aside width="200px" style="background-color: #f5f5f5; border-right: 1px solid #ddd;">
+      <el-menu default-active="/" class="el-menu-vertical" router>
         <el-menu-item index="/today-bookings">Today</el-menu-item>
         <el-menu-item index="/">Bookings</el-menu-item>
         <el-menu-item index="/properties">Properties</el-menu-item>
+        <el-menu-item index="/guests">Guests</el-menu-item>
         <el-menu-item index="/report">Report</el-menu-item>
         <el-menu-item index="/property-report">Property Report</el-menu-item>
-
-
       </el-menu>
-    </el-header>
-    <el-main>
-      <router-view />
-    </el-main>
+    </el-aside>
+
+    <!-- 右侧内容 -->
+    <el-container>
+      <!-- 顶部导航栏 -->
+      <el-header height="60px" class="header-bar">
+        <el-button type="primary" link @click="goBack" class="mr-4">
+          ← Back
+        </el-button>
+
+        <el-input
+          v-model="searchQuery"
+          placeholder="Search Booking / Property / Room / Guest"
+          clearable
+          @keyup.enter.native="handleSearch"
+          style="max-width: 400px"
+        >
+          <template #append>
+            <el-button icon="el-icon-search" @click="handleSearch" />
+          </template>
+        </el-input>
+        <el-button type="primary" link @click="goForward" class="mr-4">
+          → forward
+        </el-button>
+      </el-header>
+
+      <!-- 主内容区 -->
+      <el-main class="main-content">
+        <router-view />
+      </el-main>
+    </el-container>
   </el-container>
 </template>
+
+<style scoped>
+.header-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.main-content {
+  padding: 16px;
+  background: #fafafa;
+}
+</style>

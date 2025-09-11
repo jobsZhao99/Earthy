@@ -5,24 +5,38 @@ import { getPagination } from "../utils/pagination.js";
 const r = Router();
 
 /** 列表 + 搜索 */
-r.get("/", async (req, res) => {
-  const { q } = req.query as any;
-  const { skip, take, page, pageSize } = getPagination(req.query);
-  const where: any = q ? {
-    OR: [
-      { name:  { contains: String(q), mode: "insensitive" } },
-      { email: { contains: String(q), mode: "insensitive" } },
-      { phone: { contains: String(q), mode: "insensitive" } },
-    ],
-  } : {};
+r.get('/', async (req, res) => {
+  const pageRaw = req.query.page;
+  const pageSizeRaw = req.query.pageSize;
+  
+  const page = typeof pageRaw === 'string' ? parseInt(pageRaw) : 1;
+  const pageSize = typeof pageSizeRaw === 'string' ? parseInt(pageSizeRaw) : 20;
+
+  const rawSearch = req.query.search;
+  const search = typeof rawSearch === 'string' ? rawSearch.toLowerCase().trim() : '';
+  const includeBookingCount = req.query.includeBookingCount === 'true';
+
+  const where = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } }
+        ]
+      }
+    : {};
 
   const [rows, total] = await Promise.all([
     prisma.guest.findMany({
-      where, skip, take, orderBy: { createdAt: "desc" },
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: includeBookingCount ? { _count: { select: { bookings: true } } } : {}
     }),
-    prisma.guest.count({ where }),
+    prisma.guest.count({ where })
   ]);
-  res.json({ page, pageSize, total, rows });
+
+  res.json({ rows, total });
 });
 
 /** 详情（含全部 bookings） */
