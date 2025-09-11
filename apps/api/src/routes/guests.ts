@@ -16,15 +16,15 @@ r.get('/', async (req, res) => {
   const search = typeof rawSearch === 'string' ? rawSearch.toLowerCase().trim() : '';
   const includeBookingCount = req.query.includeBookingCount === 'true';
 
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-          { phone: { contains: search, mode: 'insensitive' } }
-        ]
-      }
-    : {};
+  const where = keyword
+  ? {
+      OR: [
+        { name: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+        { email: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+        { phone: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+      ],
+    }
+  : {};
 
   const [rows, total] = await Promise.all([
     prisma.guest.findMany({
