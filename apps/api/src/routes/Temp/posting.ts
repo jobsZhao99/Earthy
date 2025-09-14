@@ -1,7 +1,7 @@
 // src/routes/posting.ts
 import { Router } from "express";
-import { prisma } from "../prisma.js";
-import { monthStartUTC, nextMonthUTC } from "../utils/dates.js";
+import { prisma } from "../../prisma.js";
+import { monthStartUTC, nextMonthUTC } from "../../utils/dates.js";
 import { AccountCode } from "@prisma/client";
 
 const r = Router();
