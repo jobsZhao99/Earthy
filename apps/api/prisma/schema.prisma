@@ -11,16 +11,27 @@ datasource db {
 
 enum BookingRecordType {
   NEW
-  TRANSFER_IN
+  UPDATE
+  CANCEL
+  EXTEND
+  SHORTEN
   TRANSFER_OUT
-  CANCELL
+  TRANSFER_IN
 }
 
 enum BookingStatus {
-  FUTURE        // 已预订但未入住
+  CONFIRMED        // 已预订但未入住
   CHECKED_IN    // 已入住
   CHECKED_OUT   // 已退房
   CANCELLED     // 已取消
+}
+
+
+model Setting {
+  id      String   @id @default(cuid())
+  key     String   @unique
+  value   Json     // 存任意 JSON，比如颜色配置
+  updatedAt DateTime @updatedAt
 }
 
 
@@ -35,27 +46,17 @@ enum AccountCode {
 }
 
 
-enum Channel {
-  AIRBNB
-  BOOKING_COM
-  EXPEDIA
-  DIRECT
-  LEASING_CONTRACT
-  OTHER
-}
-
 enum RoomStatus {
-  CLEANED              // 已清洁，随时可用
-  CLEANING_SCHEDULED   // 已安排清洁，但还没完成
-
   OCCUPIED             // 已入住
   CHECKED_OUT_DIRTY          // 已退房，但还没清洁
+  CLEANING_SCHEDULED   // 已安排清洁，但还没完成
+  CLEANED              // 已清洁，随时可用
+
 
   ON_HOLD              // 暂时锁定，不对外出租（例如维修/房东保留）
   MAINTENANCE          // 维修中
   OFF_MARKET           // 永久下架，不对外出租
-
-  RESERVED             // 已预订，但客人还没入住
+  LONG_TERM           // 长租中
 }
 
 
@@ -70,7 +71,11 @@ model Ledger {
   updatedAt DateTime @updatedAt
 }
 
-
+model Channel {
+  id    String  @id @default(cuid())
+  label String          @unique  // 比如 "Airbnb 短租平台"
+  bookings Booking[]
+}
 
 model Property {
   id        String   @id @default(cuid())
@@ -80,7 +85,6 @@ model Property {
   ledger  Ledger @relation(fields: [ledgerId], references: [id])
   
   rooms     Room[]
-  timezone  String   @default("America/Los_Angeles") // IANA TZ
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([ledgerId, name])
@@ -95,15 +99,13 @@ model Room {
   label       String
   nightlyRateCents Int? 
 
-  bookings    BookingRecord[]
+  bookings    Booking[]
 
-  cleaningStatus RoomStatus @default(CHECKED_OUT_DIRTY)
-
+  roomStatus RoomStatus @default(CHECKED_OUT_DIRTY)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  tag       String?  @default("") // 自定义标签
 
-
-  
   @@unique([propertyId, label])
 }
 
@@ -116,35 +118,56 @@ model Guest {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt 
 
-    bookings  BookingRecord[]
+    bookings  Booking[]
 
 }
 
 // 租客预订记录, 包含新预订、退房、取消等状态
 model BookingRecord {
-    id            String   @id @default(cuid())
-    roomId        String
-    type          BookingRecordType   @default(NEW)
-    status        BookingStatus      @default(FUTURE) // 新增状态字段
-    guestId       String
-    checkIn       DateTime
-    checkOut      DateTime
-    guestTotalCents Int?          // 租客支付总额（Gross, 含平台费/税费）
-    payoutCents     Int?          // 平台打给房东的净额 (Host Payout)
-    journalLines    JournalLine[]
+  id              String   @id @default(cuid())
+  bookingId       String
+  type            BookingRecordType @default(NEW)  // NEW, CANCEL, UPDATE 等
 
-    channel       Channel  @default(AIRBNB)
-    confirmationCode String?  // 平台订单号
-    contractUrl   String?  // 租赁合同链接（可选）
-    tzSnapshot    String?   // 生成时记录使用的时区（可选但很有用）
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
-    memo            String?   @db.Text
+  // 差值字段：和上一次状态相比
+  guestDeltaCents Int?    // 租客支付的变动额
+  payoutDeltaCents Int?   // 房东净收入的变动额
 
-  room  Room  @relation(fields: [roomId], references: [id])
-  guest Guest @relation(fields: [guestId], references: [id])
+  rangeStart      DateTime?  // 变动的起点
+  rangeEnd        DateTime?  // 变动的终点
 
-    @@index([roomId,guestId])
+  createdAt       DateTime @default(now())
+  memo            String? @db.Text
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  journalLines JournalLine[]
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  roomId          String
+  status          BookingStatus @default(CONFIRMED) // CONFIRMED, CHECKED_IN, CHECKED_OUT, CANCELLED
+  guestId         String
+  checkIn         DateTime
+  checkOut        DateTime
+
+  guestTotalCents Int?      // 最终租客支付总额（Gross）
+  payoutCents     Int?      // 最终房东净收入（Host Payout）
+
+  channelId       String 
+  channel   Channel @relation(fields: [channelId], references: [id])
+  externalRef     String?  // 渠道订单号或合同号
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  memo            String?   @db.Text
+
+  room   Room   @relation(fields: [roomId], references: [id])
+  guest  Guest  @relation(fields: [guestId], references: [id])
+  bookingRecords BookingRecord[]
+
+  @@unique([externalRef, channelId,roomId]) // 同一渠道同一房间同一订单号只能有一条
+  @@index([externalRef, channelId])
+
+  @@index([roomId, guestId])
 }
 
 
@@ -170,8 +193,8 @@ model JournalLine {
   journal  JournalEntry @relation(fields: [journalId], references: [id])
 
 
-  bookingId    String
-  booking      BookingRecord   @relation(fields: [bookingId], references: [id])
+  bookingRecordId    String
+  bookingRecord      BookingRecord   @relation(fields: [bookingRecordId], references: [id])
 
 
   account      AccountCode
@@ -180,6 +203,6 @@ model JournalLine {
 
 
   // 幂等过账关键：同一 booking、同一科目、同一会计月只有一条
-  @@unique([bookingId, account,journalId])
+  @@unique([bookingRecordId, account,journalId])
   @@index([account,journalId])
 }

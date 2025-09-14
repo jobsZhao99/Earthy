@@ -181,10 +181,10 @@ async function submit() {
     </el-form-item>
 
     <el-form-item label="Check In">
-      <el-date-picker v-model="form.checkIn" type="datetime" placeholder="Check in" value-format="YYYY-MM-DDTHH:mm:ssZ"  />
+      <el-date-picker v-model="form.checkIn" type="date" placeholder="Check in" value-format="YYYY-MM-DD"  />
     </el-form-item>
     <el-form-item label="Check Out">
-      <el-date-picker v-model="form.checkOut" type="datetime" placeholder="Check out" value-format="YYYY-MM-DDTHH:mm:ssZ" />
+      <el-date-picker v-model="form.checkOut" type="datet" placeholder="Check out" value-format="YYYY-MM-DD" />
     </el-form-item>
 
     <el-form-item label="Channel">

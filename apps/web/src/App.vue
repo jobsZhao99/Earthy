@@ -50,8 +50,7 @@ function toggleMenu() {
 
         <el-menu-item index="/">
           <el-icon><Icon icon="mdi:calendar-check-outline" /></el-icon>
-
-          <span>Bookings</span>
+          <span>Bookings Record</span>
         </el-menu-item>
 
         <el-menu-item index="/properties">
@@ -73,6 +72,11 @@ function toggleMenu() {
           <el-icon><Icon icon="mdi:report-box-multiple-outline" /></el-icon>
           <span>Property Report</span>
         </el-menu-item>
+        <el-menu-item index="/ExampleRoomMap">
+          <el-icon><Icon icon="mdi:house-outline" /></el-icon>
+          <span>Demo Property Map</span>
+        </el-menu-item>
+        
       </el-menu>
     </el-aside>
 
@@ -93,7 +97,15 @@ function toggleMenu() {
         <el-button type="primary" link @click="goForward" class="mr-4">
           → forward
         </el-button>
+  <!-- 设置按钮放最右边 -->
+<!-- 设置按钮放最右边 -->
+        <div style="margin-left:auto;">
+          <el-button text @click="router.push('/settings')">
+            <Icon icon="mdi:settings" width="22" height="22" />
+          </el-button>
+        </div>
 
+        
       </el-header>
 
       <!-- 主内容区 -->

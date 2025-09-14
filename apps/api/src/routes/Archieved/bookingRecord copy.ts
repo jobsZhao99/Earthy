@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { prisma } from "../prisma.js";
-import { getPagination } from "../utils/pagination.js";
-import { postBookingAccruals } from "../services/posting.js";
+import { prisma } from "../../prisma.js";
+import { getPagination } from "../../utils/pagination.js";
+import { postBookingAccruals } from "../../services/posting.js";
 import { DateTime } from "luxon";
 
 const r = Router();

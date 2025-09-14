@@ -5,20 +5,21 @@ import cors, { type CorsOptions } from 'cors';
 import helmet from 'helmet';
 import { prisma } from './prisma.js';
 import { errorHandler } from './middlewares/error.js';
-
+import settings from './routes/System/settings.js';
 // === 路由（存在哪个就解开哪个） ===
-import bookings from './routes/bookings.js';
+import bookingRecord from './routes/Booking/bookingRecord.js';
+import booking from './routes/Booking/booking.js';
 import posting from './routes/posting.js';
-import properties from './routes/properties.js';
-import reports from './routes/reports.js';
+import properties from './routes/Property/property.js';
+// import reports from './routes/reports.js';
 import rooms from './routes/rooms.js';
-import reportsMultiProperties from './routes/reportsMultiProperties.js';
-import propertyListRoutes from './routes/propertiesList.js';
+// import reportsMultiProperties from './routes/reportsMultiProperties.js';
+// import propertyListRoutes from './routes/propertiesList.js';
 
 // import ledgers from './routes/ledgers.js';
 // import rooms from './routes/rooms.js';
-import guests from './routes/guests.js';
-import todayBookings from './routes/today-bookings.js';
+import guest from './routes/Guest/guest.js';
+// import todayBookings from './routes/today-bookingRecords.js';
 
 // import journals from './routes/journals.js';
 
@@ -103,18 +104,21 @@ app.get('/api/healthz', (_req, res) => res.json({ ok: true }));
 
 
 // API 路由统一挂在 /api 前缀下
-app.use('/api/bookings', bookings);
-app.use('/api', todayBookings);
+app.use('/api/settings', settings);
+app.use('/api/guests', guest);
+app.use('/api/booking', booking);
+app.use('/api/booking/bookingRecord', bookingRecord);
+// app.use('/api', todayBookings);
 
-app.use('/api/tasks', posting);
+// app.use('/api/tasks', posting);
 app.use('/api/properties', properties);
-app.use('/api/propertieslist', propertyListRoutes);
+// app.use('/api/propertieslist', propertyListRoutes);
 
-app.use('/api/reports', reports);
-app.use('/api/reports-multi-properties', reportsMultiProperties);
+// app.use('/api/reports', reports);
+// app.use('/api/reports-multi-properties', reportsMultiProperties);
 // app.use('/api/ledgers', ledgers);
 app.use('/api/rooms', rooms);
-app.use('/api/guests', guests);
+
 // app.use('/api/journals', journals);
 
 // 404 兜底（API）
