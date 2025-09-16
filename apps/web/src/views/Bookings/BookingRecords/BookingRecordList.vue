@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted, watch } from 'vue';
-  import { api } from '../../api';
-  import type { Paged, BookingRecord, Property } from '../../types';
+  import { api } from '../../../api';
+  import type { Paged, BookingRecord, Property } from '../../../types';
   import { DateTime } from 'luxon';
   import { useRouter } from 'vue-router';
 import { channel } from 'diagnostics_channel';

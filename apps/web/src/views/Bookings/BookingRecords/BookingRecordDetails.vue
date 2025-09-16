@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { api } from '../../api';
-import type { BookingRecord } from '../../types';
+import { api } from '../../../api';
+import type { BookingRecord } from '../../../types';
 import dayjs from 'dayjs';
 
 const route = useRoute();

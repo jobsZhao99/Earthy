@@ -2,8 +2,8 @@
 import { ref,reactive, onMounted,watch } from 'vue';
 import { ElMessage } from 'element-plus';
 
-import { api } from '../../api';
-import type { Property, Room, Guest } from '../../types';
+import { api } from '../../../api';
+import type { Property, Room, Guest } from '../../../types';
 import { useRouter,useRoute } from 'vue-router';
 import dayjs from 'dayjs'; // 如果没有装 dayjs，可以 `npm i dayjs`
 

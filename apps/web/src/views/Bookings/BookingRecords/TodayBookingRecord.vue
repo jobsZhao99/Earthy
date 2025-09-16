@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { api } from '../../api';
-import type { BookingRecord, Property } from '../../types';
+import { api } from '../../../api';
+import type { BookingRecord, Property } from '../../../types';
 import { DateTime } from 'luxon';
 
 const today = DateTime.now().toFormat('yyyy-LL-dd');
