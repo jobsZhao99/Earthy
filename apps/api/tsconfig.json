@@ -14,5 +14,6 @@
     "types": ["node"]
   },
   "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["scr/routes/Temp/**/*","scr/routes/Archeived/**/*"]
+  "exclude": ["scr/routes/Temp/**/*","scr/routes/Archieved/**/*"]
+  
 }
