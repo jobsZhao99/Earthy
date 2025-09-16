@@ -84,14 +84,14 @@ r.get("/:id", async (req, res) => {
 
 /** 新建 */
 r.post("/", async (req, res) => {
-  const { ledgerId, name, address, timezone } = req.body;
+  const { ledgerId, name, address } = req.body;
   if (!ledgerId || !name) {
     return res.status(400).json({ error: "ledgerId & name required" });
   }
 
   try {
     const created = await prisma.property.create({
-      data: { ledgerId, name, address, timezone },
+      data: { ledgerId, name, address },
     });
     res.status(201).json(created);
   } catch (err: any) {
