@@ -2,17 +2,17 @@
 import { PrismaClient, AccountCode } from "@prisma/client";
 import { DateTime } from "luxon";
 import { DEFAULT_TIMEZONE } from "../config.js";
-
+import { toDateOnly } from "../utils/dates.js";
 const prisma = new PrismaClient();
 
 
 /** 
  * 按“物业时区”的自然月切分入住-退房区间，返回每段的天数（含入住和退房当日） 
  */
-function splitDaysByMonthTZ(checkIn: Date, checkOut: Date, tz: string) {
+function splitDaysByMonthTZ(checkIn: Date, checkOut: Date) {
   // 注意：这里退房日也算一天
-  const ci = DateTime.fromJSDate(checkIn).setZone(tz).startOf("day");
-  const co = DateTime.fromJSDate(checkOut).setZone(tz).startOf("day").plus({ days: 1 }); 
+  const ci = DateTime.fromJSDate(checkIn);
+  const co = DateTime.fromJSDate(checkOut).plus({ days: 1 });
   // ↑ 把退房日包含进去 → 等价于 nights+1
 
   if (co <= ci) return [];
@@ -40,11 +40,10 @@ export async function postBookingAccruals(bookingId: string) {
   });
   if (!booking) throw new Error("Booking not found");
 
-  const tz = booking.room.property ? booking.room.property.timezone : DEFAULT_TIMEZONE;
   const ledgerId = booking.room.property.ledgerId;
 
   // 切分
-  const chunks = splitDaysByMonthTZ(booking.checkIn, booking.checkOut, tz);
+  const chunks = splitDaysByMonthTZ(booking.checkIn, booking.checkOut);
   const totalDays = chunks.reduce((s, c) => s + c.days, 0);
   if (totalDays === 0) return { posted: 0 };
 
