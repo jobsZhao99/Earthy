@@ -9,7 +9,7 @@ import settings from './routes/System/settings.js';
 // === 路由（存在哪个就解开哪个） ===
 import bookingRecord from './routes/Booking/bookingRecord.js';
 import booking from './routes/Booking/booking.js';
-import posting from './routes/Temp/posting.js';
+// import posting from './services/posting.js';
 import properties from './routes/Property/property.js';
 // import reports from './routes/reports.js';
 import rooms from './routes/Property/room.js';
