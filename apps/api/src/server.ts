@@ -12,7 +12,7 @@ import booking from './routes/Booking/booking.js';
 import posting from './routes/Temp/posting.js';
 import properties from './routes/Property/property.js';
 // import reports from './routes/reports.js';
-import rooms from './routes/rooms.js';
+import rooms from './routes/Property/room.js';
 // import reportsMultiProperties from './routes/reportsMultiProperties.js';
 // import propertyListRoutes from './routes/propertiesList.js';
 
