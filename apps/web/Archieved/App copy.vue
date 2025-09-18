@@ -42,11 +42,15 @@ function toggleMenu() {
             </el-icon>
           </el-button>
         </div>
+        <el-menu-item index="/today-bookings">
+          <el-icon><Icon icon="mdi:home-time-outline" /></el-icon>
 
+          <span>Today</span>
+        </el-menu-item>
 
-        <el-menu-item index="/booking">
+        <el-menu-item index="/">
           <el-icon><Icon icon="mdi:calendar-check-outline" /></el-icon>
-          <span>Bookings</span>
+          <span>Bookings Record</span>
         </el-menu-item>
 
         <el-menu-item index="/properties">
@@ -57,6 +61,20 @@ function toggleMenu() {
         <el-menu-item index="/guests">
           <el-icon><Icon icon="mdi:people-outline" /></el-icon>
           <span>Guests</span>
+        </el-menu-item>
+
+        <el-menu-item index="/report">
+          <el-icon><Icon icon="mdi:report-line" /></el-icon>
+          <span>Report</span>
+        </el-menu-item>
+
+        <el-menu-item index="/property-report">
+          <el-icon><Icon icon="mdi:report-box-multiple-outline" /></el-icon>
+          <span>Property Report</span>
+        </el-menu-item>
+        <el-menu-item index="/ExampleRoomMap">
+          <el-icon><Icon icon="mdi:house-outline" /></el-icon>
+          <span>Demo Property Map</span>
         </el-menu-item>
         
       </el-menu>
