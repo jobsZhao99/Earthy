@@ -46,17 +46,17 @@ function toggleMenu() {
 
         <el-menu-item index="/booking">
           <el-icon><Icon icon="mdi:calendar-check-outline" /></el-icon>
-          <span>Bookings</span>
+          <span>Booking</span>
         </el-menu-item>
 
         <el-menu-item index="/property">
           <el-icon><Icon icon="mdi:house-city-outline" /></el-icon>
-          <span>Properties</span>
+          <span>Property</span>
         </el-menu-item>
 
         <el-menu-item index="/guest">
           <el-icon><Icon icon="mdi:people-outline" /></el-icon>
-          <span>Guests</span>
+          <span>Guest</span>
         </el-menu-item>
         
       </el-menu>
