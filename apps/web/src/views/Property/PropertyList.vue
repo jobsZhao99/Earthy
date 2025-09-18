@@ -3,7 +3,7 @@ import { ref, onMounted, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '../../api';
 import type { Paged, Property } from '../../types';
-import PropertyLink from '../Properties/PropertyLink.vue';
+import PropertyLink from '../Property/PropertyLink.vue';
 
 const router = useRouter();
 const loading = ref(false);
@@ -26,7 +26,7 @@ async function load() {
   try {
     const queryString = new URLSearchParams(params as any).toString();
 
-    const res = await api.get(`/properties?${queryString}`);
+    const res = await api.get(`/property?${queryString}`);
     console.log('API response:', res,params);
 
     if (res && typeof res === 'object') {

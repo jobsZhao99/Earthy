@@ -10,7 +10,7 @@ import settings from './routes/System/settings.js';
 import bookingRecord from './routes/Booking/bookingRecord.js';
 import booking from './routes/Booking/booking.js';
 // import posting from './services/posting.js';
-import properties from './routes/Property/property.js';
+import property from './routes/Property/property.js';
 // import reports from './routes/reports.js';
 import room from './routes/Property/room.js';
 // import reportsMultiProperties from './routes/reportsMultiProperties.js';
@@ -111,7 +111,7 @@ app.use('/api/booking/bookingRecord', bookingRecord);
 // app.use('/api', todayBookings);
 
 // app.use('/api/tasks', posting);
-app.use('/api/properties', properties);
+app.use('/api/property', property);
 // app.use('/api/propertieslist', propertyListRoutes);
 
 // app.use('/api/reports', reports);

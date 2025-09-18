@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
     path: '/room/:id/edit',
     component: () => import('../views/Room/RoomEdit.vue')
   },
-  { path: '/ExampleRoomMap', component: () => import('../views/Properties/ExampleRoomMap.vue') },
+  { path: '/ExampleRoomMap', component: () => import('../views/Property/ExampleRoomMap.vue') },
   { path: '/settings', component: () => import('../views/System/Settings.vue') },
 
 ];
