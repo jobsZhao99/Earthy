@@ -6,6 +6,7 @@ import type { Guest, Booking } from '../../types';
 import { DateTime } from 'luxon';
 import PropertyLink from '../Properties/PropertyLink.vue';
 import RoomLink from '../Rooms/RoomLink.vue';
+import { toDateStr } from "../../utils/date.js";
 
 const route = useRoute();
 const guestId = route.params.id as string;
@@ -55,13 +56,13 @@ const latestCheckOut = computed(() => {
 
 const totalNetRate = computed(() => {
   return (
-    bookings.value.reduce((sum, b) => sum + (b.netRate ?? 0), 0)
+    bookings.value.reduce((sum, b) => sum + (b.payoutCents ?? 0), 0)/100.0
   ).toFixed(2);
 });
 
 const totalRent = computed(() => {
   return (
-    bookings.value.reduce((sum, b) => sum + (b.totalRent ?? 0), 0)
+    bookings.value.reduce((sum, b) => sum + (b.guestTotalCents ?? 0)/100.0, 0)
   ).toFixed(2);
 });
 
@@ -108,15 +109,12 @@ const tagType = computed(() => {
       </el-tag>
     </h2>
     <el-card shadow="never" class="mb-4">
-      <el-descriptions title="Guest Info" column="2" border>
+      <el-descriptions title="Guest Info" :column="2" border>
         <el-descriptions-item label="Email">
           {{ guest.email }}
         </el-descriptions-item>
         <el-descriptions-item label="Phone">
           {{ guest.phone }}
-        </el-descriptions-item>
-        <el-descriptions-item label="Confirmation Code">
-          {{ guest.confirmationCode }}
         </el-descriptions-item>
 
         <el-descriptions-item label="Earliest Check-in">
@@ -132,7 +130,7 @@ const tagType = computed(() => {
           ${{ totalRent }}
         </el-descriptions-item>
         <el-descriptions-item label="Created At">
-          {{ fmt(guest.createdAt) }}
+          {{ toDateStr(guest.createdAt) }}
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
@@ -140,7 +138,7 @@ const tagType = computed(() => {
     <el-divider>Bookings</el-divider>
 
     <el-table :data="bookings" v-loading="loading" border>
-      <el-table-column label="Confirm Date" prop="confirmedDate" :formatter="row => fmt(row?.confirmedDate)" sortable />
+      <el-table-column label="Confirm Date" prop="confirmedDate" :formatter="row => toDateStr(row?.createdAt)" sortable />
       <el-table-column label="Property">
         <template #default="{ row }">
           <PropertyLink :property="row.room.property" />
@@ -151,20 +149,20 @@ const tagType = computed(() => {
           <RoomLink :room="row.room" />
         </template>
       </el-table-column>
-      <el-table-column label="Cleaning Status" prop="room.cleaningStatus" />
+      <el-table-column label="Confirmation Code" prop="externalRef" />
 
       <el-table-column label="Check In" :formatter="row => fmt(row.checkIn)" />
       <el-table-column label="Check Out" :formatter="row => fmt(row.checkOut)" />
-      <el-table-column label="Channel" prop="channel" />
+      <el-table-column label="Channel" prop="channel.label" />
       <el-table-column label="Status" prop="status" />
 
       <el-table-column
         label="Net Rate"
-        :formatter="row => (row?.netRate != null ? '$' + row.netRate.toFixed(2) : '')"
+        :formatter="row => (row?.payoutCents != null ? '$' + row.payoutCents.toFixed(2)/100.0 : '')"
       />
       <el-table-column
         label="Total Rent"
-        :formatter="row => (row?.totalRent != null ? '$' + row.totalRent.toFixed(2) : '')"
+        :formatter="row => (row?.guestTotalCents != null ? '$' + row.guestTotalCents.toFixed(2)/100.0 : '')"
       />
     </el-table>
   </div>

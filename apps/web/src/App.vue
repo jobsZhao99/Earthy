@@ -49,12 +49,12 @@ function toggleMenu() {
           <span>Bookings</span>
         </el-menu-item>
 
-        <el-menu-item index="/properties">
+        <el-menu-item index="/property">
           <el-icon><Icon icon="mdi:house-city-outline" /></el-icon>
           <span>Properties</span>
         </el-menu-item>
 
-        <el-menu-item index="/guests">
+        <el-menu-item index="/guest">
           <el-icon><Icon icon="mdi:people-outline" /></el-icon>
           <span>Guests</span>
         </el-menu-item>

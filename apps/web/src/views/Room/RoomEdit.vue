@@ -15,7 +15,7 @@ const saving = ref(false)
 async function loadRoom() {
   loading.value = true
   try {
-    const res = await api.get(`/rooms/${roomId}`)
+    const res = await api.get(`/room/${roomId}`)
     room.value = res
   } finally {
     loading.value = false
@@ -26,8 +26,8 @@ async function saveRoom() {
   if (!room.value) return
   saving.value = true
   try {
-    await api.put(`/rooms/${roomId}`, room.value)
-    router.push(`/rooms/${roomId}`)
+    await api.put(`/room/${roomId}`, room.value)
+    router.push(`/room/${roomId}`)
   } finally {
     saving.value = false
   }

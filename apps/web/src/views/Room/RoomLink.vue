@@ -7,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <router-link :to="`/rooms/${room.id}`">
+  <router-link :to="`/room/${room.id}`">
     {{ room.label }}
   </router-link>
 </template>

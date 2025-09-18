@@ -19,7 +19,7 @@ function fmt(dt: string) {
 async function loadRoom() {
   loading.value = true
   try {
-    const res = await api.get(`/rooms/${roomId}`)
+    const res = await api.get(`/room/${roomId}`)
     room.value = res
   } finally {
     loading.value = false
@@ -29,7 +29,7 @@ async function loadRoom() {
 onMounted(loadRoom)
 
 function goEdit() {
-  router.push(`/rooms/${roomId}/edit`)
+  router.push(`/room/${roomId}/edit`)
 }
 </script>
 

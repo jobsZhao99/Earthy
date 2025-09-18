@@ -82,7 +82,7 @@ function handleDetail(id: string) {
     <el-table-column label="Guest" prop="guest.name" sortable width="160">
       <template #default="{ row }">
         <router-link
-          :to="`/guests/${row.guestId}`"
+          :to="`/guest/${row.guestId}`"
           class="text-blue-500 hover:underline"
         >
           {{ row.guest?.name || "-" }}

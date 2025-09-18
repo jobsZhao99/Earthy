@@ -25,6 +25,8 @@ export interface Guest {
   name: string;
   email?: string | null;
   phone?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Channel {

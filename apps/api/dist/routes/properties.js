@@ -15,7 +15,7 @@ r.get("/", async (req, res) => {
         prisma.property.findMany({
             where, skip, take,
             orderBy: { createdAt: "desc" },
-            include: { rooms: true },
+            include: { room: true },
         }),
         prisma.property.count({ where }),
     ]);
@@ -25,7 +25,7 @@ r.get("/", async (req, res) => {
 r.get("/:id", async (req, res) => {
     const row = await prisma.property.findUnique({
         where: { id: req.params.id },
-        include: { rooms: true, ledger: true },
+        include: { room: true, ledger: true },
     });
     if (!row)
         return res.status(404).json({ error: "Not found" });

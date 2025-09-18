@@ -8,12 +8,12 @@ const routes: RouteRecordRaw[] = [
   // { path: '/booking/:id', name: 'BookingDetail', component: () => import('../views/Bookings/BookingRecords/BookingRecordDetails.vue') },
   // { path: '/bookings/new', component: () => import('../views/Bookings/BookingRecords/BookingRecordEdit.vue') },
   // { path: '/bookings/:id/edit', component: () => import('../views/Bookings/BookingRecords/BookingRecordEdit.vue') },
-  { path: '/properties', component: () => import('../views/Properties/PropertyList.vue') },
-  { path: '/properties/:id', component: () => import('../views/Properties/PropertyDetail.vue') },
-  { path: '/guests', component: () => import('../views/Guests/GuestList.vue') },
-  { path: '/guests/:id', component: () => import('../views/Guests/GuestDetail.vue') },
+  { path: '/properties', component: () => import('../views/Property/PropertyList.vue') },
+  { path: '/properties/:id', component: () => import('../views/Property/PropertyDetail.vue') },
+  { path: '/guest', component: () => import('../views/Guest/GuestList.vue') },
+  { path: '/guest/:id', component: () => import('../views/Guest/GuestDetail.vue') },
   { path: '/report', component: () => import('../views/Report/Report.vue') },
-  { path: '/property-report', component: () => import('../views/Report/ReportProperties.vue') },
+  // { path: '/property-report', component: () => import('../views/Report/ReportProperties.vue') },
   // { path: '/ledgers', component: () => import('../views/Ledgers/List.vue') },
   // { path: '/today-bookings', component: () => import('../views/Bookings/BookingRecords/TodayBookingRecord.vue') },
   {
@@ -27,12 +27,12 @@ const routes: RouteRecordRaw[] = [
   // },
 
   {
-    path: '/rooms/:id',
-    component: () => import('../views/Rooms/RoomDetail.vue')
+    path: '/room/:id',
+    component: () => import('../views/Room/RoomDetail.vue')
   },
   {
-    path: '/rooms/:id/edit',
-    component: () => import('../views/Rooms/RoomEdit.vue')
+    path: '/room/:id/edit',
+    component: () => import('../views/Room/RoomEdit.vue')
   },
   { path: '/ExampleRoomMap', component: () => import('../views/Properties/ExampleRoomMap.vue') },
   { path: '/settings', component: () => import('../views/System/Settings.vue') },

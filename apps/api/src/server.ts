@@ -12,12 +12,12 @@ import booking from './routes/Booking/booking.js';
 // import posting from './services/posting.js';
 import properties from './routes/Property/property.js';
 // import reports from './routes/reports.js';
-import rooms from './routes/Property/room.js';
+import room from './routes/Property/room.js';
 // import reportsMultiProperties from './routes/reportsMultiProperties.js';
 // import propertyListRoutes from './routes/propertiesList.js';
 
 // import ledgers from './routes/ledgers.js';
-// import rooms from './routes/rooms.js';
+
 import guest from './routes/Guest/guest.js';
 // import todayBookings from './routes/today-bookingRecords.js';
 
@@ -117,7 +117,7 @@ app.use('/api/properties', properties);
 // app.use('/api/reports', reports);
 // app.use('/api/reports-multi-properties', reportsMultiProperties);
 // app.use('/api/ledgers', ledgers);
-app.use('/api/rooms', rooms);
+app.use('/api/room', room);
 
 // app.use('/api/journals', journals);
 

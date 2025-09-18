@@ -23,7 +23,7 @@ async function loadGuests() {
       search: search.value.trim()
     }).toString();
 
-    const res = await api.get(`/guests?${query}`);
+    const res = await api.get(`/guest?${query}`);
     guests.value = res.rows ?? [];
     totalGuests.value = res.total ?? 0;
   } finally {
@@ -43,7 +43,7 @@ function handleSearch() {
 }
 
 function goToDetail(id: string) {
-  router.push(`/guests/${id}`);
+  router.push(`/guest/${id}`);
 }
 </script>
 
