@@ -43,7 +43,7 @@ onMounted(load);
       <p><b>Status:</b> {{ booking.status }}</p>
       <p><b>Guest:</b>
         <router-link
-          :to="`/guests/${booking.guestId}`"
+          :to="`/guest/${booking.guestId}`"
           class="text-blue-500 hover:underline"
         >
           {{ booking.guest?.name || "-" }}

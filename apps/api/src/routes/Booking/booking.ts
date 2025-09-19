@@ -9,56 +9,131 @@ const r = Router();
 
 /** 列表 + 搜索 + 分页
  * GET /api/booking?page=1&pageSize=20&search=xxx
- */
+//  */
+// r.get('/', async (req, res) => {
+//   const { skip, take, page, pageSize } = getPagination(req.query);
+
+//   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+//     const propertyId = typeof req.query.propertyId === 'string' ? req.query.propertyId : null;
+
+//   const ci = Prisma.QueryMode.insensitive;
+
+//   const where: Prisma.BookingWhereInput = search
+//     ? {
+//         OR: [
+//           // 普通字段
+//           { externalRef: { contains: search, mode: ci } },
+//           { memo: { contains: search, mode: ci } },
+
+//           // 关联 guest
+//           {
+//             guest: {
+//               is: {
+//                 OR: [
+//                   { name: { contains: search, mode: ci } },
+//                   { email: { contains: search, mode: ci } },
+//                   { phone: { contains: search, mode: ci } },
+//                 ],
+//               },
+//             },
+//           },
+
+//           // 关联 room（包含 property.name）
+//           {
+//             room: {
+//               is: {
+//                 OR: [
+//                   { label: { contains: search, mode: ci } },
+//                   { property: { is: { name: { contains: search, mode: ci } } } },
+//                 ],
+//               },
+//             },
+//           },
+
+//           // 关联 channel.label
+//           {
+//             channel: {
+//               is: {
+//                 label: { contains: search, mode: ci },
+//               },
+//             },
+//           },
+//         ],
+//       }
+//     : {};
+
+//   const [rows, total] = await Promise.all([
+//     prisma.booking.findMany({
+//       where,
+//       skip,
+//       take,
+//       orderBy: { createdAt: 'desc' },
+//       include: {
+//         guest: true,
+//         room: { include: { property: true } },
+//         channel: true,
+//       },
+//     }),
+//     prisma.booking.count({ where }),
+//   ]);
+
+//   const rowsWithDates = rows.map((b) => ({
+//     ...b,
+//     checkIn: toDateStr(b.checkIn),
+//     checkOut: toDateStr(b.checkOut),
+//   }));
+  
+
+//   res.json({ rows:rowsWithDates, total, page, pageSize });
+// });
+
 r.get('/', async (req, res) => {
   const { skip, take, page, pageSize } = getPagination(req.query);
 
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+  const propertyId = typeof req.query.propertyId === 'string' ? req.query.propertyId : null;
   const ci = Prisma.QueryMode.insensitive;
 
-  const where: Prisma.BookingWhereInput = search
-    ? {
-        OR: [
-          // 普通字段
-          { externalRef: { contains: search, mode: ci } },
-          { memo: { contains: search, mode: ci } },
+  const where: Prisma.BookingWhereInput = {};
 
-          // 关联 guest
-          {
-            guest: {
-              is: {
-                OR: [
-                  { name: { contains: search, mode: ci } },
-                  { email: { contains: search, mode: ci } },
-                  { phone: { contains: search, mode: ci } },
-                ],
-              },
-            },
-          },
+  // propertyId filter
+  if (propertyId) {
+    where.room = { propertyId };
+  }
 
-          // 关联 room（包含 property.name）
-          {
-            room: {
-              is: {
-                OR: [
-                  { label: { contains: search, mode: ci } },
-                  { property: { is: { name: { contains: search, mode: ci } } } },
-                ],
-              },
-            },
+  // search filter
+  if (search) {
+    where.OR = [
+      { externalRef: { contains: search, mode: ci } },
+      { memo: { contains: search, mode: ci } },
+      {
+        guest: {
+          is: {
+            OR: [
+              { name: { contains: search, mode: ci } },
+              { email: { contains: search, mode: ci } },
+              { phone: { contains: search, mode: ci } },
+            ],
           },
-
-          // 关联 channel.label
-          {
-            channel: {
-              is: {
-                label: { contains: search, mode: ci },
-              },
-            },
+        },
+      },
+      {
+        room: {
+          is: {
+            OR: [
+              { label: { contains: search, mode: ci } },
+              { property: { is: { name: { contains: search, mode: ci } } } },
+            ],
           },
-        ],
-      }
-    : {};
+        },
+      },
+      {
+        channel: {
+          is: { label: { contains: search, mode: ci } },
+        },
+      },
+    ];
+  }
 
   const [rows, total] = await Promise.all([
     prisma.booking.findMany({
@@ -80,9 +155,8 @@ r.get('/', async (req, res) => {
     checkIn: toDateStr(b.checkIn),
     checkOut: toDateStr(b.checkOut),
   }));
-  
 
-  res.json({ rows:rowsWithDates, total, page, pageSize });
+  res.json({ rows: rowsWithDates, total, page, pageSize });
 });
 
 /** 获取单个

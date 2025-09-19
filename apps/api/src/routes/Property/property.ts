@@ -1,4 +1,4 @@
-// src/routes/properties.ts
+// src/routes/property.ts
 import { Router } from "express";
 import { prisma } from "../../prisma.js";
 import { getPagination } from "../../utils/pagination.js";

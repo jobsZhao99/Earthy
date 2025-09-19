@@ -4,8 +4,8 @@ import { useRoute } from 'vue-router';
 import { api } from '../../api';
 import type { Guest, Booking } from '../../types';
 import { DateTime } from 'luxon';
-import PropertyLink from '../Properties/PropertyLink.vue';
-import RoomLink from '../Rooms/RoomLink.vue';
+import PropertyLink from '../Property/PropertyLink.vue';
+import RoomLink from '../Room/RoomLink.vue';
 import { toDateStr } from "../../utils/date.js";
 
 const route = useRoute();

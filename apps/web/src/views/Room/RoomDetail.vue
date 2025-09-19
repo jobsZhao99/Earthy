@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api } from '../../api'
 import type { Room } from '../../types'
 import { DateTime } from 'luxon'
-
+import { toDateStr } from '../../utils/date.js'
 const route = useRoute()
 const router = useRouter()
 const roomId = route.params.id as string
@@ -42,7 +42,7 @@ function goEdit() {
     </h1>
 
     <el-card shadow="never" class="mb-4">
-      <el-descriptions title="Room Info" column="2" border>
+      <el-descriptions title="Room Info" :column="2" border>
         <el-descriptions-item label="Property">
           {{ room.property?.name }}
         </el-descriptions-item>
@@ -53,10 +53,10 @@ function goEdit() {
           {{ room.cleaningStatus }}
         </el-descriptions-item>
         <el-descriptions-item label="Created At">
-          {{ fmt(room.createdAt) }}
+          {{ toDateStr(room.createdAt) }}
         </el-descriptions-item>
         <el-descriptions-item label="Updated At">
-          {{ fmt(room.updatedAt) }}
+          {{ toDateStr(room.updatedAt) }}
         </el-descriptions-item>
       </el-descriptions>
     </el-card>

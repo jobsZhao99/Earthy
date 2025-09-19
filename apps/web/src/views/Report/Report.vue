@@ -29,7 +29,7 @@ const months = computed(() => {
 
 async function load() {
   loading.value = true;
-  const res = await api.get('/reports/ledger-summary?' + new URLSearchParams({
+  const res = await api.get('/report/ledger-summary?' + new URLSearchParams({
     from: from.value,
     to: to.value,
   }));

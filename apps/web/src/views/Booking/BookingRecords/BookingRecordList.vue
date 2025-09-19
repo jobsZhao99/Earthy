@@ -26,7 +26,7 @@ import { channel } from 'diagnostics_channel';
   const data = ref<Paged<BookingRecord>>({ page:1, pageSize:1000, total:0, rows:[] });
 
   async function loadProperties() {
-    const res = await api.get('/properties');
+    const res = await api.get('/property');
     // console.log(res);
     properties.value = res.rows ?? res ?? [];
   }

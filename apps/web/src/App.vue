@@ -58,6 +58,11 @@ function toggleMenu() {
           <el-icon><Icon icon="mdi:people-outline" /></el-icon>
           <span>Guest</span>
         </el-menu-item>
+
+        <el-menu-item index="/report">
+          <el-icon><Icon icon="mdi:note" /></el-icon>
+          <span>Report</span>
+        </el-menu-item>
         
       </el-menu>
     </el-aside>

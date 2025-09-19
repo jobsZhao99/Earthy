@@ -27,7 +27,7 @@ async function load() {
     const queryString = new URLSearchParams(params as any).toString();
 
     const res = await api.get(`/property?${queryString}`);
-    console.log('API response:', res,params);
+    // console.log('API response:', res,params);
 
     if (res && typeof res === 'object') {
       Object.assign(data, res);
@@ -62,6 +62,7 @@ watch(() => [params.page, params.pageSize], load);
       <template #default="{ row }">
         <PropertyLink :property="row" />
       </template>
+      
     </el-table-column>
     <el-table-column prop="address" label="Address" sortable />
     <el-table-column label="Room Count" width="120">

@@ -5,8 +5,8 @@ import { useRoute } from 'vue-router';
 import { api } from '../../api';
 import type { Property, BookingRecord } from '../../types';
 import { DateTime } from 'luxon';
-import PropertyLink from '../Properties/PropertyLink.vue';
-import RoomLink from '../Rooms/RoomLink.vue';
+import PropertyLink from '../Property/PropertyLink.vue';
+import RoomLink from '../Room/RoomLink.vue';
 const route = useRoute();
 const propertyId = route.params.id as string;
 
@@ -17,15 +17,19 @@ const loading = ref(true);
 async function loadDetail() {
   loading.value = true;
   try {
-    const propRes = await api.get(`/properties/${propertyId}`);
+    const propRes = await api.get(`/property/${propertyId}`);
     property.value = propRes;
 
-    const bookingsRes = await api.get('/bookings?' + new URLSearchParams({
+    const bookingsRes = await api.get('/booking?' + new URLSearchParams({
       propertyId,
       pageSize: '1000'
     }).toString());
 
-    bookings.value = bookingsRes.rows ?? [];
+    // bookings.value = bookingsRes.rows ?? [];
+    bookings.value = (bookingsRes.rows ?? []).map(b => ({
+      ...b,
+      roomLabel: b.room?.label || ''
+    }));
   } finally {
     loading.value = false;
   }
@@ -44,12 +48,14 @@ onMounted(loadDetail);
   <div v-else>
     <h1 class="text-2xl font-bold mb-4">Property: {{ property?.name }}</h1>
     <p><strong>Address:</strong> {{ property?.address }}</p>
-    <p><strong>Timezone:</strong> {{ property?.timezone }}</p>
-
-    <h2 class="text-xl font-bold mt-6 mb-2">Bookings</h2>
+    <h2 class="text-xl font-bold mt-6 mb-2">Booking</h2>
     <el-table :data="bookings" border>
       <!-- <el-table-column label="Room" prop="room.label" width="120" /> -->
-      <el-table-column label="Room">
+      <el-table-column
+        label="Room"
+        prop="roomLabel"
+        sortable
+      >
         <template #default="{ row }">
           <RoomLink :room="row.room" />
         </template>
@@ -57,7 +63,9 @@ onMounted(loadDetail);
       <el-table-column label="Guest" prop="guest.name" />
       <el-table-column label="Check In" prop="checkIn" :formatter="row => fmtDate(row.checkIn)" sortable />
       <el-table-column label="Check Out" prop="checkOut" :formatter="row => fmtDate(row.checkOut)" sortable />
-      <el-table-column label="Channel" prop="channel" />
+      <el-table-column label="Channel" prop="channel.label" />
+      <el-table-column label="Payout"
+      :formatter="(row) => row?.payoutCents != null ? '$' + (row.payoutCents / 100).toFixed(2) : ''" />  
       <el-table-column label="Guest Total"
         :formatter="(row) => row?.guestTotalCents != null ? '$' + (row.guestTotalCents / 100).toFixed(2) : ''" />
     </el-table>

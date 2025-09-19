@@ -62,13 +62,22 @@ function handleDetail(id: string) {
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
-    <el-table-column label="Actions" width="120">
-      <template #default="{ row }">
-        <el-button size="small" @click="handleDetail(row.id)">View</el-button>
+    <!-- <el-table-column label="Actions" width="120"> -->
+      <!-- <template #default="{ row }"> -->
+        <!-- <el-button size="small" @click="handleDetail(row.id)">View</el-button> -->
         <!-- <el-button size="small" type="primary" @click="handleEdit(row.id)">Edit</el-button> -->
+      <!-- </template> -->
+    <!-- </el-table-column> -->
+    <el-table-column label="Booking Record" prop="externalRef" width="180">
+      <template #default="{ row }">
+        <router-link
+          :to="`/booking/${row.id}`"
+          class="text-blue-500 hover:underline"
+        >
+          {{ row.externalRef || "-" }}
+        </router-link>
       </template>
     </el-table-column>
-
     <el-table-column label="Status" prop="status" sortable width="130" />
     <el-table-column
       label="Confirm Date"
@@ -89,16 +98,7 @@ function handleDetail(id: string) {
         </router-link>
       </template>
     </el-table-column>
-    <el-table-column label="External Ref" prop="externalRef" width="180">
-      <template #default="{ row }">
-        <router-link
-          :to="`/booking/${row.id}`"
-          class="text-blue-500 hover:underline"
-        >
-          {{ row.externalRef || "-" }}
-        </router-link>
-      </template>
-    </el-table-column>
+
     <el-table-column label="Check In" prop="checkIn" sortable width="140" />
     <el-table-column label="Check Out" prop="checkOut" sortable width="140" />
     <el-table-column label="Channel" prop="channel.label" sortable width="150" />

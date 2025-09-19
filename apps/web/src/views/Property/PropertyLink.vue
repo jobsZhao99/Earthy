@@ -7,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <router-link :to="`/properties/${property.id}`">
+  <router-link :to="`/property/${property.id}`">
     {{ property.name }}
   </router-link>
 </template>
