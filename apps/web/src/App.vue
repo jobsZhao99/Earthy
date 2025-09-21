@@ -63,7 +63,15 @@ function toggleMenu() {
           <el-icon><Icon icon="mdi:note" /></el-icon>
           <span>Report</span>
         </el-menu-item>
-        
+
+        <el-menu-item index="/property-report">
+          <el-icon><Icon icon="mdi:report-box-multiple-outline" /></el-icon>
+          <span>Property Report</span>
+        </el-menu-item>
+        <el-menu-item index="/ExampleRoomMap">
+          <el-icon><Icon icon="mdi:house-outline" /></el-icon>
+          <span>Demo Property Map</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 

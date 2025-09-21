@@ -2,15 +2,20 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "../../api";
-import type { Booking } from "../../types";
+import type { Booking, BookingRecord } from "../../types";
+// import { DateTime } from "luxon";
 import { toDateStr } from "../../utils/date.js";
-import { ElMessage, ElMessageBox } from "element-plus";
 
 const route = useRoute();
 const router = useRouter();
 
 const loading = ref(false);
 const booking = ref<Booking | null>(null);
+
+// function fmtDate(dt?: string | null) {
+//   if (!dt) return "";
+//   return DateTime.fromISO(dt).toFormat("yyyy-LL-dd");
+// }
 
 async function load() {
   loading.value = true;
@@ -20,22 +25,6 @@ async function load() {
     booking.value = res;
   } finally {
     loading.value = false;
-  }
-}
-
-
-async function deleteRecord(recordId: string) {
-  try {
-    await ElMessageBox.confirm("Are you sure you want to delete this Booking Record?", "Confirm", {
-      type: "warning",
-    });
-    await api.delete(`/booking/bookingRecord/${recordId}`);
-    ElMessage.success("Booking Record deleted");
-    await load(); // 重新刷新数据
-  } catch (err: any) {
-    if (err !== "cancel") {
-      ElMessage.error(err.message || "Failed to delete Booking Record");
-    }
   }
 }
 
@@ -64,7 +53,7 @@ onMounted(load);
       <p><b>Room:</b> {{ booking.room?.label }}</p>
       <p><b>Channel:</b> {{ booking.channel?.label }}</p>
       <p><b>External Ref:</b> {{ booking.externalRef || "-" }}</p>
-      <p><b>Check In:</b> {{ toDateStr(booking.checkIn) }}</p>
+      <p><b>Check In:</b> {{ toDateStr(booking.checkIn )}}</p>
       <p><b>Check Out:</b> {{ toDateStr(booking.checkOut) }}</p>
       <p><b>Payout:</b>
         {{ booking.payoutCents != null ? "$" + (booking.payoutCents / 100).toFixed(2) : "-" }}
@@ -113,28 +102,6 @@ onMounted(load);
           width="160"
         />
         <el-table-column prop="memo" label="Memo" />
-        <el-table-column
-          label="Journal Total"
-          :formatter="(row) => {
-            if (!row.journalLines) return '';
-            const total = row.journalLines.reduce((sum, jl) => sum + (jl.amountCents ?? 0), 0);
-            return '$' + (total / 100).toFixed(2);
-          }"
-          width="150"
-        />
-        <!-- 操作列 -->
-        <el-table-column label="Actions" width="120">
-          <template #default="{ row }">
-            <el-button
-              type="danger"
-              size="small"
-              @click="deleteRecord(row.id)"
-            >
-              Delete
-            </el-button>
-          </template>
-        </el-table-column>
-
       </el-table>
     </el-card>
 
@@ -143,3 +110,9 @@ onMounted(load);
     </div>
   </div>
 </template>
+
+<style scoped>
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+</style>

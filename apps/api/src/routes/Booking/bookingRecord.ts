@@ -1,19 +1,21 @@
 import { Router } from "express";
 import { prisma } from "../../prisma.js";
 import { getPagination } from "../../utils/pagination.js";
-import { postBookingAccruals } from "../../services/posting.js";
+// import { postBookingAccruals } from "../../../Archieved/posting.js";
 import { toDateOnly,toDateStr } from "../../utils/dates.js";
+import {recalcBooking} from "../../services/recalBooking.js";
+import { postBookingAccruals } from "../../services/posting.js";
+
 const r = Router();
 
 /** 列表：支持 一堆过滤 + 分页 */
 r.get("/", async (req, res) => {
-  const { bookingId, type, q } = req.query as any;
+  const { bookingId, type, q, from, to, propertyIds } = req.query as any;
   const { skip, take, page, pageSize } = getPagination(req.query);
 
   const where: any = {};
   if (bookingId) where.bookingId = String(bookingId);
   if (type) where.type = String(type);
-
 
   if (q) {
     where.OR = [
@@ -28,6 +30,33 @@ r.get("/", async (req, res) => {
     ];
   }
 
+  // ✅ 新增过滤：from / to / propertyIds
+  if (from || to || propertyIds) {
+    where.AND = [];
+    if (from) {
+      where.AND.push({
+        rangeEnd: { gte: new Date(from + "-01") },
+      });
+    }
+    if (to) {
+      // 用月底
+      const [y, m] = to.split("-");
+      const endDate = new Date(Number(y), Number(m), 0); // JS：月份从0开始，传 m 会自动到下月0号=上月最后一天
+      where.AND.push({
+        rangeStart: { lte: endDate },
+      });
+    }
+    if (propertyIds) {
+      const ids = String(propertyIds).split(",").filter(Boolean);
+      where.AND.push({
+        booking: {
+          room: {
+            propertyId: { in: ids },
+          },
+        },
+      });
+    }
+  }
 
   const [rows, total] = await Promise.all([
     prisma.bookingRecord.findMany({
@@ -37,7 +66,11 @@ r.get("/", async (req, res) => {
       orderBy: { createdAt: "desc" },
       include: {
         booking: {
-          include: { room: { include: { property: true } }, guest: true, channel: true },
+          include: { room: {
+            include: {
+              property: { include: { ledger: true } },
+            },
+          } },
         },
         journalLines: true,
       },
@@ -45,16 +78,13 @@ r.get("/", async (req, res) => {
     prisma.bookingRecord.count({ where }),
   ]);
 
-  const rowsWithDates = rows.map((b) => {
-    return {
-      ...b,
-      rangeStart: toDateStr(b.rangeStart),
-      rangeEnd: toDateStr(b.rangeEnd),
-    };
-  });
+  const rowsWithDates = rows.map((b) => ({
+    ...b,
+    rangeStart: toDateStr(b.rangeStart),
+    rangeEnd: toDateStr(b.rangeEnd),
+  }));
 
-  res.json({ page, pageSize, total, rows:rowsWithDates });
-
+  res.json({ page, pageSize, total, rows: rowsWithDates });
 });
 
 /** 详情 */
@@ -92,6 +122,9 @@ r.post("/", async (req, res) => {
       memo,
     },
   });
+  await recalcBooking(bookingId); // 👈 新建后自动更新 booking
+  await postBookingAccruals(created.id);
+
   res.status(201).json(created);
 });
 
@@ -126,15 +159,38 @@ r.patch("/:id", async (req, res) => {
     where: { id: req.params.id },
     data,
   });
+  await recalcBooking(updated.bookingId); // 👈 新建后自动更新 booking
+  await postBookingAccruals(updated.id);
   res.json(updated);
 });
 
-/** 删除 */
-r.delete("/:id", async (req, res) => {
-  await prisma.bookingRecord.delete({ where: { id: req.params.id } });
-  res.status(204).end();
-});
+// /** 删除 */
+// r.delete("/:id", async (req, res) => {
+//   const deleted = await prisma.bookingRecord.delete({ where: { id: req.params.id } });
+//   await recalcBooking(deleted.bookingId); // 👈 删除后 recalculation
+//   await prisma.journalLine.deleteMany({ where: { bookingRecordId: deleted.id } });
 
+//   res.status(204).end();
+// });
+r.delete("/:id", async (req, res) => {
+  const recordId = req.params.id;
+  try {
+    // 先删掉 JournalLines
+    await prisma.journalLine.deleteMany({
+      where: { bookingRecordId: recordId },
+    });
+
+    // 再删 BookingRecord
+    await prisma.bookingRecord.delete({
+      where: { id: recordId },
+    });
+
+    res.status(204).end();
+  } catch (err) {
+    console.error("Delete bookingRecord failed:", err);
+    res.status(500).json({ error: "Failed to delete bookingRecord" });
+  }
+});
 /** 批量删除（危险操作） */
 r.delete("/", async (req, res) => {
   const { bookingId, before } = req.query as any;

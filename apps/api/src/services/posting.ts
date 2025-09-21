@@ -1,112 +1,101 @@
-// src/services/posting.ts
 import { PrismaClient, AccountCode } from "@prisma/client";
 import { DateTime } from "luxon";
-import { DEFAULT_TIMEZONE } from "../config.js";
-import { toDateOnly } from "../utils/dates.js";
+
 const prisma = new PrismaClient();
 
+function daysPerMonth(startJS: Date, endJS?: Date) {
+  let start = DateTime.fromJSDate(startJS).toUTC().startOf("day");
+  let end = endJS
+    ? DateTime.fromJSDate(endJS).plus({ days: 1 }).toUTC().startOf("day")
+    : start.plus({ days: 1 });
 
-/** 
- * 按“物业时区”的自然月切分入住-退房区间，返回每段的天数（含入住和退房当日） 
- */
-function splitDaysByMonthTZ(checkIn: Date, checkOut: Date) {
-  // 注意：这里退房日也算一天
-  const ci = DateTime.fromJSDate(checkIn);
-  const co = DateTime.fromJSDate(checkOut).plus({ days: 1 });
-  // ↑ 把退房日包含进去 → 等价于 nights+1
+  if (end <= start) end = start.plus({ days: 1 });
 
-  if (co <= ci) return [];
-
-  const chunks: { periodMonthUTC: Date; days: number }[] = [];
-  let cursor = ci;
-  while (cursor < co) {
-    const monthStartLocal = cursor.startOf("month");
-    const nextMonthLocal = monthStartLocal.plus({ months: 1 });
-    const stop = co < nextMonthLocal ? co : nextMonthLocal;
-    const days = Math.max(0, Math.round(stop.diff(cursor, "days").days));
-    if (days > 0) {
-      // 账期：该地月初 → UTC 月初
-      const periodMonthUTC = monthStartLocal.toUTC().startOf("month").toJSDate();
-      chunks.push({ periodMonthUTC, days });
-    }
-    cursor = nextMonthLocal;
+  const map = new Map<string, number>();
+  let cursor = start;
+  while (cursor < end) {
+    const key = cursor.startOf("month").toISODate(); // YYYY-MM-01
+    map.set(key, (map.get(key) ?? 0) + 1);
+    cursor = cursor.plus({ days: 1 });
   }
-  return chunks;
+  return map;
 }
-export async function postBookingAccruals(bookingId: string) {
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { room: { include: { property: true } } }
-  });
-  if (!booking) throw new Error("Booking not found");
 
-  const ledgerId = booking.room.property.ledgerId;
-
-  // 切分
-  const chunks = splitDaysByMonthTZ(booking.checkIn, booking.checkOut);
-  const totalDays = chunks.reduce((s, c) => s + c.days, 0);
-  if (totalDays === 0) return { posted: 0 };
-
-  const totalCents = booking.payoutCents ?? 0;
-
-  // ⚠️ 先找到（或创建）一个 BookingRecord 作为过账基准
-  let bookingRecord = await prisma.bookingRecord.findFirst({
-    where: { bookingId: booking.id, type: "NEW" }
-  });
-  if (!bookingRecord) {
-    bookingRecord = await prisma.bookingRecord.create({
-      data: {
-        bookingId: booking.id,
-        type: "NEW",
-        guestDeltaCents: booking.guestTotalCents,
-        payoutDeltaCents: booking.payoutCents,
-        rangeStart: booking.checkIn,
-        rangeEnd: booking.checkOut,
-      }
-    });
+function allocateByDays(total: number, monthDays: Array<{ key: string; days: number }>) {
+  if (!Number.isFinite(total) || total === 0 || monthDays.length === 0) {
+    return new Map<string, number>();
   }
+  const totalDays = monthDays.reduce((s, d) => s + d.days, 0);
+  const alloc = new Map<string, number>();
+  let allocated = 0;
+  for (let i = 0; i < monthDays.length; i++) {
+    const { key, days } = monthDays[i];
+    if (i < monthDays.length - 1) {
+      const share = Math.round((total * days) / totalDays);
+      alloc.set(key, share);
+      allocated += share;
+    } else {
+      const remainder = total - allocated;
+      alloc.set(key, remainder);
+    }
+  }
+  return alloc;
+}
 
-  // 分摊写入 JournalLine
-  let createdLines = 0;
-  let allocatedCents = 0;
-  let allocatedDays = 0;
-  for (let i = 0; i < chunks.length; i++) {
-    const { periodMonthUTC, days } = chunks[i];
-    const baseDays = i < chunks.length - 1 ? days : totalDays - allocatedDays;
-    const share =
-      i < chunks.length - 1
-        ? Math.round((totalCents * baseDays) / totalDays)
-        : totalCents - allocatedCents;
+/** 给单条 bookingRecord 生成/更新对应 JournalLines */
+export async function postBookingAccruals(recordId: string) {
+  const r = await prisma.bookingRecord.findUnique({
+    where: { id: recordId },
+    include: {
+      booking: {
+        include: {
+          room: { include: { property: { include: { ledger: true } } } },
+        },
+      },
+    },
+  });
+  if (!r) return;
+  const ledger = r.booking?.room?.property?.ledger;
+  if (!ledger) return;
 
-    allocatedCents += share;
-    allocatedDays += baseDays;
+  const monthDaysMap = daysPerMonth(r.rangeStart, r.rangeEnd);
+  const monthDays = [...monthDaysMap.entries()].map(([key, days]) => ({ key, days }));
 
-    await prisma.$transaction(async (tx) => {
-      const journal = await tx.journalEntry.upsert({
-        where: { periodMonth_ledgerId: { periodMonth: periodMonthUTC, ledgerId } },
-        update: {},
-        create: {
-          periodMonth: periodMonthUTC,
-          ledgerId,
-          memo: `Auto posting ${DateTime.fromJSDate(periodMonthUTC).toISODate()}`
-        }
-      });
+  const allocGuest = allocateByDays(r.payoutDeltaCents ?? 0, monthDays);
 
-      try {
-        await tx.journalLine.create({
-          data: {
-            journalId: journal.id,
-            bookingRecordId: bookingRecord.id,  // ✅ 用 bookingRecordId
+  for (const { key: monthKey } of monthDays) {
+    const periodMonth = DateTime.fromISO(monthKey).startOf("month").toJSDate();
+    const journal = await prisma.journalEntry.upsert({
+      where: {
+        periodMonth_ledgerId: { periodMonth, ledgerId: ledger.id },
+      },
+      update: {},
+      create: {
+        periodMonth,
+        ledgerId: ledger.id,
+        memo: `Auto for ${monthKey}`,
+      },
+      select: { id: true },
+    });
+
+    const rentCents = allocGuest.get(monthKey) ?? 0;
+    if (rentCents !== 0) {
+      await prisma.journalLine.upsert({
+        where: {
+          bookingRecordId_account_journalId: {
+            bookingRecordId: r.id,
             account: AccountCode.RENT,
-            amountCents: share
-          }
-        });
-        createdLines++;
-      } catch (e: any) {
-        if (e?.code !== "P2002") throw e;
-      }
-    });
+            journalId: journal.id,
+          },
+        },
+        update: { amountCents: rentCents },
+        create: {
+          journalId: journal.id,
+          bookingRecordId: r.id,
+          account: AccountCode.RENT,
+          amountCents: rentCents,
+        },
+      });
+    }
   }
-
-  return { posted: createdLines, months: chunks.length, totalDays, totalCents };
 }

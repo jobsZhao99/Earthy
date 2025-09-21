@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { api } from "../../api";
 import type { Paged, Booking, Property } from "../../types";
 import { DateTime } from "luxon";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const router = useRouter();
 const loading = ref(false);
@@ -29,6 +30,22 @@ async function load() {
   }
 }
 
+
+async function downloadExcel() {
+  try {
+    const blob = await api.getBlob("/export-bookings");
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "bookings.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error("Download failed:", err);
+  }
+}
+
 function fmtDate(dt?: string) {
   if (!dt) return "";
   return DateTime.fromISO(dt).toFormat("yyyy-LL-dd");
@@ -41,9 +58,37 @@ function handleNew() {
   router.push("/booking/new");
 }
 
-// function handleEdit(id: string) {
-//   router.push(`/booking/${id}/edit`);
-// }
+
+async function handleDelete(id: string) {
+  try {
+    await ElMessageBox.confirm(
+      "确定要删除这个 Booking 吗？此操作不可恢复！",
+      "提示",
+      {
+        type: "warning",
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+      }
+    );
+    // 用户确认删除
+    await api.delete(`/booking/${id}`);
+    ElMessage.success("删除成功");
+    await load();
+  } catch (err: any) {
+    if (err === "cancel") {
+      // 用户点了取消，不提示
+      return;
+    }
+    console.error("删除失败:", err);
+    if (err?.message?.includes("Cannot delete booking with booking records")) {
+      ElMessage.error("该 Booking 下还有 BookingRecord，不能删除");
+    } else {
+      ElMessage.error("删除失败: " + (err.message || "未知错误"));
+    }
+  }
+}
+
+
 
 function handleDetail(id: string) {
   router.push(`/booking/${id}`);
@@ -59,15 +104,18 @@ function handleDetail(id: string) {
       style="width: 320px"
     />
     <el-button type="primary" @click="handleNew">New Booking</el-button>
+    <el-button type="primary" @click="downloadExcel">Download Excel</el-button>
+
   </div>
 
   <el-table :data="data.rows" v-loading="loading" border>
-    <!-- <el-table-column label="Actions" width="120"> -->
-      <!-- <template #default="{ row }"> -->
+    <el-table-column label="Actions" width="120">
+      <template #default="{ row }">
         <!-- <el-button size="small" @click="handleDetail(row.id)">View</el-button> -->
         <!-- <el-button size="small" type="primary" @click="handleEdit(row.id)">Edit</el-button> -->
-      <!-- </template> -->
-    <!-- </el-table-column> -->
+        <el-button size="small" type="primary" @click="handleDelete(row.id)">Delete</el-button>
+      </template>
+    </el-table-column>
     <el-table-column label="Booking Record" prop="externalRef" width="180">
       <template #default="{ row }">
         <router-link
@@ -122,7 +170,7 @@ function handleDetail(id: string) {
   <div class="mt-3 flex justify-end">
     <el-pagination
       layout="prev, pager, next, sizes, total"
-      :page-sizes="[10, 20, 50, 100]"
+      :page-sizes="[10, 20, 50, 100,1000]"
       v-model:current-page="q.page"
       v-model:page-size="q.pageSize"
       :total="data.total"

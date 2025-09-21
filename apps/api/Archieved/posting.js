@@ -1,7 +1,7 @@
 // src/services/posting.ts
 import { PrismaClient, AccountCode } from "@prisma/client";
 import { DateTime } from "luxon";
-import { DEFAULT_TIMEZONE } from "../config.js";
+import { DEFAULT_TIMEZONE } from "../dist/config.js";
 const prisma = new PrismaClient();
 /** 把入住/退房按“物业时区”的自然月切成若干段，返回每段晚数及对应的 UTC 会计月 */
 function splitNightsByMonthTZ(checkIn, checkOut, tz) {

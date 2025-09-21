@@ -13,7 +13,7 @@
     "outDir": "dist",
     "types": ["node"]
   },
-  "include": ["src/**/*", "scripts/**/*", "Archieved/test-prisma.js"],
+  "include": ["src/**/*", "scripts/**/*", "Archieved/test-prisma.js", "Archieved/posting.ts"],
   "exclude": ["Archieved/**/*"]
   
 }

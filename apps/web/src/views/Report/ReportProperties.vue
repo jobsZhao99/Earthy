@@ -19,7 +19,7 @@ const allProperties = ref<{ id: string; name: string }[]>([]);
 const selectedProperties = ref<string[]>([]);
 
 async function fetchProperties() {
-  const res = await api.get('/propertieslist');
+  const res = await api.get('/property/list');
   allProperties.value = res ?? [];
 }
 
@@ -34,6 +34,7 @@ const months = computed(() => {
   }
   return result;
 });
+const bookingRecords = ref<any[]>([]);
 
 async function load() {
   loading.value = true;
@@ -47,6 +48,10 @@ async function load() {
 
   const res = await api.get('/reports-multi-properties?' + new URLSearchParams(params));
   data.value = res.rows ?? res ?? [];
+
+  const recRes = await api.get('/booking/bookingRecord?' + new URLSearchParams(params));
+  bookingRecords.value = recRes.rows ?? recRes ?? [];
+
   loading.value = false;
 }
 
@@ -103,6 +108,20 @@ onMounted(() => {
       :formatter="(_, __, val) => val ? ('$' + (val / 100).toFixed(2)) : ''"
     />
   </el-table>
+
+  <el-divider content-position="left">Booking Records</el-divider>
+
+<el-table :data="bookingRecords" border style="width: 100%">
+  <el-table-column label="ExternalRef" prop="booking.externalRef" />
+  <el-table-column label="Guest" prop="booking.guest.name" />
+  <el-table-column label="Property" prop="booking.room.property.name" />
+  <el-table-column label="Room" prop="booking.room.label" />
+  <el-table-column label="Ledger" prop="booking.room.property.ledger.name" />
+  <el-table-column label="Type" prop="type" />
+  <el-table-column label="Range Start" :formatter="(_, __, row) => row.rangeStart ? DateTime.fromISO(row.rangeStart).toFormat('yyyy-MM-dd') : ''" />
+  <el-table-column label="Range End" :formatter="(_, __, row) => row.rangeEnd ? DateTime.fromISO(row.rangeEnd).toFormat('yyyy-MM-dd') : ''" />
+  <el-table-column label="Payout Δ" :formatter="(_, __, row) => row.payoutDeltaCents ? ('$' + (row.payoutDeltaCents / 100).toFixed(2)) : ''" />
+</el-table>
 </template>
 
 <style scoped>

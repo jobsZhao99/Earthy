@@ -15,13 +15,21 @@
     "prisma:deploy": "prisma migrate deploy",
     "seed": "tsx src/seed.ts",
     "postinstall": "prisma generate",
-    "update:booking-status": "npx tsx src/scripts/updateBookingStatus.ts"
+    "update:booking-status": "npx tsx src/scripts/updateBookingStatus.ts",
+    "clear": "npx tsx src/scripts/00clearBookings.ts",
+    "import": "npx tsx src/scripts/1fastImport-all.ts data/BookingRecord.tsv",
+    "fixBookings": "npx tsx src/scripts/2FixBooking.ts",
+    "updateStatus": "npx tsx src/scripts/3updateBookingStatus.ts",
+    "postaccrual": "npx tsx src/scripts/4post-accruals.ts  data/BookingRecord.tsv",
+    "verify": "npx tsx src/scripts/5verify.ts data/BookingRecord.tsv",
+    "all:scripts": "npm run clear && npm run import && npm run updateStatus && npm run fixBookings  && npm run postaccrual && npm run verify"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "cors": "^2.8.5",
     "csv-stringify": "^6.6.0",
     "dotenv": "^16.6.1",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "luxon": "^3.7.2",

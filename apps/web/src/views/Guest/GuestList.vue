@@ -45,25 +45,32 @@ function handleSearch() {
 function goToDetail(id: string) {
   router.push(`/guest/${id}`);
 }
+
+// ✅ 新建 Guest
+function handleNew() {
+  router.push('/guest/new');
+}
 </script>
 
 <template>
   <el-card shadow="never">
     <template #header>
-        <div class="flex items-center justify-between">
-            <div class="text-lg font-semibold">Guests</div>
-            <div class="flex items-center gap-2">
-                <el-input
-                v-model="search"
-                placeholder="Search name, email, or phone"
-                clearable
-                style="width: 300px"
-                @keydown.enter="handleSearch"
-                @clear="handleSearch"
-                />
-            <el-button type="primary" @click="handleSearch">Search</el-button>
-            </div>
+      <div class="flex items-center justify-between">
+        <div class="text-lg font-semibold">Guests</div>
+        <div class="flex items-center gap-2">
+          <el-input
+            v-model="search"
+            placeholder="Search name, email, or phone"
+            clearable
+            style="width: 300px"
+            @keydown.enter="handleSearch"
+            @clear="handleSearch"
+          />
+          <el-button type="primary" @click="handleSearch">Search</el-button>
+          <!-- ✅ 新增按钮 -->
+          <el-button type="success" @click="handleNew">New Guest</el-button>
         </div>
+      </div>
     </template>
 
     <el-table :data="guests" v-loading="loading" style="width: 100%">

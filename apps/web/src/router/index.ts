@@ -4,6 +4,8 @@ const routes: RouteRecordRaw[] = [
   // { path: '/', component: () => import('../views/Bookings/BookingRecords/BookingRecordList.vue') },
   { path: '/booking', component: () => import('../views/Booking/BookingList.vue') },
   { path: '/booking/:id', name: 'BookingDetail', component: () => import('../views/Booking/BookingDetail.vue') },
+  { path: '/booking/:id/edit', name: 'Booking Edit', component: () => import('../views/Booking/BookingEdit.vue') },
+  { path: '/booking/new', name: 'Booking New', component: () => import('../views/Booking/BookingNew.vue') },
 
   // { path: '/booking/:id', name: 'BookingDetail', component: () => import('../views/Bookings/BookingRecords/BookingRecordDetails.vue') },
   // { path: '/bookings/new', component: () => import('../views/Bookings/BookingRecords/BookingRecordEdit.vue') },
@@ -12,8 +14,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/property/:id', component: () => import('../views/Property/PropertyDetail.vue') },
   { path: '/guest', component: () => import('../views/Guest/GuestList.vue') },
   { path: '/guest/:id', component: () => import('../views/Guest/GuestDetail.vue') },
+  { path: '/guest/new', component: () => import('../views/Guest/GuestNew.vue') },
   { path: '/report', component: () => import('../views/Report/Report.vue') },
-  // { path: '/property-report', component: () => import('../views/Report/ReportProperties.vue') },
+  { path: '/property-report', component: () => import('../views/Report/ReportProperties.vue') },
   // { path: '/ledgers', component: () => import('../views/Ledgers/List.vue') },
   // { path: '/today-bookings', component: () => import('../views/Bookings/BookingRecords/TodayBookingRecord.vue') },
   {

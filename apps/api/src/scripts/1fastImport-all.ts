@@ -141,7 +141,6 @@ function mapType(t?: string): BookingRecordType {
   return BookingRecordType.NEW;
 }
 
-
 async function main() {
   const fileArg = process.argv[2] || 'data/all.tsv';
   const filePath = path.resolve(process.cwd(), fileArg);
@@ -210,6 +209,8 @@ async function main() {
       }
 
       // Booking
+      const confirmDate = parseDate(r.confirmedDate) || new Date();
+
       const channelId = detectChannelSync(r.note, r.confirmationCode, channelMap);
       let booking = await prisma.booking.findFirst({
         where: { externalRef: r.confirmationCode || undefined, channelId, roomId: room.id }
@@ -228,6 +229,8 @@ async function main() {
             channelId,
             memo: r.note || null,
             status: BookingStatus.CONFIRMED,
+            createdAt: confirmDate,   // 👈 用 ConfirmedDate
+            updatedAt: confirmDate,   // 👈 同步覆盖
           }
         });
 
@@ -239,15 +242,22 @@ async function main() {
             payoutDeltaCents: parseMoneyToCents(r.netRate),
             rangeStart: parseDate(r.moveIn),
             rangeEnd: parseDate(r.moveOut),
-            createdAt: parseDate(r.confirmedDate) || new Date(),
+            // createdAt: parseDate(r.confirmedDate) || new Date(),
+            createdAt: confirmDate,   // 👈 用 ConfirmedDate
             memo: `Imported NEW from sheet, extRef=${r.confirmationCode || ''}`
           }
         });
       } else {
+
+        booking = await prisma.booking.update({
+          where: { id: booking.id },
+          data: { updatedAt: confirmDate }  // 👈 覆盖 updatedAt
+        });
+      
         await prisma.bookingRecord.create({
           data: {
             bookingId: booking.id,
-            type: BookingRecordType.EXTEND,
+            type: mapType(r.type),
             guestDeltaCents: parseMoneyToCents(r.totalRent) ?? 0,
             payoutDeltaCents: parseMoneyToCents(r.netRate) ?? 0,
             rangeStart: parseDate(r.moveIn),

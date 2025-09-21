@@ -64,7 +64,7 @@ r.post("/", async (req, res) => {
         },
     });
     // —— 关键：创建后立即自动过账（同步执行）——
-    const posting = await postBookingAccruals(created.id);
+    // const posting = await postBookingAccruals(created.id);
     res.status(201).json({ booking: created, posting });
 });
 /** 批量创建（导入用） */

@@ -74,59 +74,6 @@ function allocateByDays(total: number, monthDays: Array<{ key: string; days: num
   return alloc;
 }
 
-// function allocateByDays(total: number, monthDays: Array<{ key: string; days: number }>) {
-//   if (!Number.isFinite(total) || total === 0 || monthDays.length === 0) {
-//     return new Map<string, number>();
-//   }
-//   const totalDays = monthDays.reduce((s, d) => s + d.days, 0);
-//   if (totalDays <= 0) {
-//     // 保险：全部给第一个月
-//     const m = new Map<string, number>();
-//     m.set(monthDays[0].key, total);
-//     return m;
-//   }
-
-//   type Row = { key: string; days: number; exact: number; base: number; diff: number };
-//   const rows: Row[] = monthDays.map(({ key, days }) => {
-//     const exact = (total * days) / totalDays; // 可能是小数/负数
-//     let base: number;
-//     let diff: number;
-//     if (total >= 0) {
-//       base = Math.floor(exact);
-//       diff = exact - base; // [0,1)
-//     } else {
-//       base = Math.ceil(exact);
-//       diff = base - exact; // [0,1)：离下一个更负整数的距离
-//     }
-//     return { key, days, exact, base, diff };
-//   });
-
-//   const sumBase = rows.reduce((s, r) => s + r.base, 0);
-//   let remainder = total - sumBase; // 对于正数 >=0；负数 <=0
-
-//   // 排序规则：
-//   //  - total >= 0：diff 大的优先加 1
-//   //  - total < 0：diff 大的优先减 1（因为我们先用了 ceil，基数之和会偏大）
-//   rows.sort((a, b) => b.diff - a.diff);
-
-//   const alloc = new Map<string, number>();
-//   for (const r of rows) alloc.set(r.key, r.base);
-
-//   if (remainder > 0) {
-//     for (let i = 0; i < remainder; i++) {
-//       const k = rows[i % rows.length].key;
-//       alloc.set(k, (alloc.get(k) ?? 0) + 1);
-//     }
-//   } else if (remainder < 0) {
-//     const need = -remainder;
-//     for (let i = 0; i < need; i++) {
-//       const k = rows[i % rows.length].key;
-//       alloc.set(k, (alloc.get(k) ?? 0) - 1);
-//     }
-//   }
-
-//   return alloc;
-// }
 
 async function main() {
   console.log('▶ Start generating JournalLines (monthly split)…');

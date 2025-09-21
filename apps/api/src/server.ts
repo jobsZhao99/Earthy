@@ -13,7 +13,9 @@ import booking from './routes/Booking/booking.js';
 import property from './routes/Property/property.js';
 import report from './routes/Report/report.js';
 import room from './routes/Property/room.js';
-// import reportsMultiProperties from './routes/reportsMultiProperties.js';
+import reportsMultiProperties from './routes/Report/reportsMultiProperties.js';
+import channel from './routes/Channel/channel.js';
+import exportExcel from './routes/exports.js';
 // import propertyListRoutes from './routes/propertiesList.js';
 
 // import ledgers from './routes/ledgers.js';
@@ -105,6 +107,8 @@ app.get('/api/healthz', (_req, res) => res.json({ ok: true }));
 
 // API 路由统一挂在 /api 前缀下
 app.use('/api/settings', settings);
+app.use('/api/channel', channel);
+app.use('/api/export-bookings', exportExcel);
 app.use('/api/guest', guest);
 app.use('/api/booking', booking);
 app.use('/api/booking/bookingRecord', bookingRecord);
@@ -115,7 +119,7 @@ app.use('/api/property', property);
 // app.use('/api/propertieslist', propertyListRoutes);
 
 app.use('/api/report', report);
-// app.use('/api/reports-multi-properties', reportsMultiProperties);
+app.use('/api/reports-multi-properties', reportsMultiProperties);
 // app.use('/api/ledgers', ledgers);
 app.use('/api/room', room);
 

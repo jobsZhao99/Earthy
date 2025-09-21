@@ -9,11 +9,24 @@ const data = ref<any[]>([]);
 const loading = ref(false);
 const colors = ref<{ [k: string]: string }>({});
 
+// 弹窗状态
+const dialogVisible = ref(false);
+const form = ref({
+  propertyId: "",
+  label: "",
+  nightlyRateCents: null as number | null,
+  roomStatus: "CLEANED",
+  tag: "",
+});
+
+const saving = ref(false);
+
+
 async function load() {
   loading.value = true;
   try {
     const [res,roomColors] = await Promise.all([
-    api.get("/propertieslist?includeRooms=true"),
+    api.get("/property/list?includeRooms=true"),
     api.get("/settings/roomColors"),
   ]);
     data.value = res ?? [];
@@ -22,6 +35,32 @@ async function load() {
     loading.value = false;
   }
 }
+
+
+// 新建 room
+async function saveRoom() {
+  if (!form.value.propertyId || !form.value.label) {
+    return alert("请选择物业并填写房间号");
+  }
+  saving.value = true;
+  try {
+    await api.post("/room", form.value);
+    dialogVisible.value = false;
+    await load();
+    // 重置表单
+    form.value = {
+      propertyId: "",
+      label: "",
+      nightlyRateCents: null,
+      roomStatus: "CLEANED",
+      tag: "",
+    };
+  } finally {
+    saving.value = false;
+  }
+}
+
+
 
 onMounted(load);
 
@@ -50,7 +89,12 @@ function getRoomColor(room: any) {
 <template>
   <el-card shadow="never">
     <template #header>
-      <div class="text-lg font-semibold">房态图 Demo</div>
+      <div class="flex justify-between items-center">
+        <div class="text-lg font-semibold">Room Map</div>
+        <el-button type="primary" size="small" @click="dialogVisible = true">
+          Create Room
+        </el-button>
+      </div>
     </template>
 
     <el-table v-loading="loading" :data="data" border style="width: 100%">
@@ -62,10 +106,56 @@ function getRoomColor(room: any) {
 
       <el-table-column label="Rooms">
         <template #default="{ row }">
-          <!-- ✅ 把 getRoomColor 传进去 -->
           <RoomMap :property="row" :getRoomColor="getRoomColor" />
         </template>
       </el-table-column>
     </el-table>
   </el-card>
+
+  <!-- ✅ 新建房间弹窗 -->
+  <el-dialog v-model="dialogVisible" title="Create Room" width="500px">
+    <el-form label-width="100px">
+      <el-form-item label="Property">
+        <el-select v-model="form.propertyId" placeholder="Please select property" style="width: 100%" filterable>
+          <el-option
+            v-for="p in data"
+            :key="p.id"
+            :label="p.name"
+            :value="p.id"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="Room Label">
+        <el-input v-model="form.label" placeholder="Ex: 101" />
+      </el-form-item>
+
+      <el-form-item label="Default Nightly Rate">
+        <el-input-number
+          v-model="form.nightlyRateCents"
+          :min="0"
+          placeholder="unit: cent"
+          style="width: 100%"
+        />
+      </el-form-item>
+
+      <el-form-item label="Status">
+        <el-select v-model="form.roomStatus" style="width: 100%">
+          <el-option label="CLEANED" value="CLEANED" />
+          <el-option label="OCCUPIED" value="OCCUPIED" />
+          <el-option label="MAINTENANCE" value="MAINTENANCE" />
+          <el-option label="LONG_TERM" value="LONG_TERM" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="tag">
+        <el-input v-model="form.tag" placeholder="option" />
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <el-button @click="dialogVisible = false">Cancel</el-button>
+      <el-button type="primary" :loading="saving" @click="saveRoom">Save</el-button>
+    </template>
+  </el-dialog>
 </template>
