@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-
+import LoginView from '../views/Auth/LoginView.vue'
+// import Dashboard from '../views/Dashboard.vue'
+import Users from '../views/Auth/User.vue'
+import LedgerUser from '../views/Auth/LedgerUsers.vue';
 const routes: RouteRecordRaw[] = [
+
+ // Auth
+ { path: '/login', name: 'login', component: LoginView },
+//  { path: '/', name: 'home', component: Dashboard, meta: { requiresAuth: true } },
+ { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true, role: 'ADMIN' } },
+ { path: '/ledger/:ledgerId/users',  name: 'ledger-users',  component: LedgerUser,  meta: { requiresAuth: true }},
   // { path: '/', component: () => import('../views/Bookings/BookingRecords/BookingRecordList.vue') },
   { path: '/booking', component: () => import('../views/Booking/BookingList.vue') },
   { path: '/booking/:id', name: 'BookingDetail', component: () => import('../views/Booking/BookingDetail.vue') },
@@ -46,5 +55,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+
+
+router.beforeEach((to, _from, next) => {
+  const token = localStorage.getItem('token')
+  if (to.meta.requiresAuth && !token) return next('/login')
+  next()
+})
 
 export default router;

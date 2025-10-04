@@ -69,6 +69,7 @@ model Ledger {
   // 可选：currency, timezone, companyId 等
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  ledgerUsers LedgerUser[]
 }
 
 model Channel {
@@ -140,6 +141,9 @@ model BookingRecord {
 
   booking Booking @relation(fields: [bookingId], references: [id])
   journalLines JournalLine[]
+
+  createdByUserId String?
+  createdByUser   User? @relation(fields: [createdByUserId], references: [id])
 }
 
 model Booking {
@@ -205,4 +209,44 @@ model JournalLine {
   // 幂等过账关键：同一 booking、同一科目、同一会计月只有一条
   @@unique([bookingRecordId, account,journalId])
   @@index([account,journalId])
+}
+
+
+
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // 存哈希
+  name      String?
+  phone     String?
+
+  role      UserRole @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 可选：关联 Ledger（多账簿支持）
+  ledgerUsers LedgerUser[]
+  bookingRecordsCreated BookingRecord[]
+
+}
+
+enum UserRole {
+  ADMIN      // 系统管理员，最高权限
+  MANAGER    // 管理账簿、房源
+  STAFF      // 一般员工，只能看部分数据
+  VIEWER     // 只读
+}
+
+model LedgerUser {
+  id        String @id @default(cuid())
+  ledgerId  String
+  ledger    Ledger @relation(fields: [ledgerId], references: [id])
+
+  userId    String
+  user      User   @relation(fields: [userId], references: [id])
+
+  role      UserRole @default(VIEWER)
+
+  @@unique([ledgerId, userId])  // 一个账簿下一个人只有一个身份
 }

@@ -31,3 +31,7 @@ curl -X POST http://localhost:3000/api/bookings \
     "confirmationCode": "HM3QDH8SHY",
     "status": "NEW"
   }'
+
+
+### Search ledger users
+curl -s "http://localhost:3000/api/ledgerUsers/search-users?q=@"

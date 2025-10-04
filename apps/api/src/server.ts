@@ -16,11 +16,20 @@ import room from './routes/Property/room.js';
 import reportsMultiProperties from './routes/Report/reportsMultiProperties.js';
 import channel from './routes/Channel/channel.js';
 import exportExcel from './routes/exports.js';
+import ledger from './routes/Ledger/ledger.js';
 // import propertyListRoutes from './routes/propertiesList.js';
 
 // import ledgers from './routes/ledgers.js';
 
 import guest from './routes/Guest/guest.js';
+
+// Users & Auth 
+import { authRouter } from './routes/auth.js'
+import { usersRouter } from './routes/users.js'
+import { ledgerUsersRouter } from './routes/ledgerUsers.js'
+
+
+
 // import todayBookings from './routes/today-bookingRecords.js';
 
 // import journals from './routes/journals.js';
@@ -98,6 +107,13 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// ====== 认证相关 ======
+app.use('/api/auth', authRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/ledger', ledger)
+
+app.use('/api/ledgerUsers', ledgerUsersRouter)
 
 
 // 健康检查

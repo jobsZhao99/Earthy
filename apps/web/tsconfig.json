@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "strict": true,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "module": "esnext",
+      "target": "esnext",
+      "types": []
+    },
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/**/**/*.ts"],
+  }
+  
